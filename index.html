@@ -94,6 +94,11 @@ h3{margin:18px 0 6px;font-size:17px}
 .rules p,.rules li{max-width:70ch}
 .rules table{margin:8px 0 6px}
 .toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+details.ht{background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 14px;margin:6px 0}
+details.ht summary{cursor:pointer;font-weight:600;padding:12px 0;min-height:44px;list-style-position:inside}
+details.ht[open]{padding-bottom:10px}
+details.ht ol,details.ht ul{margin:0 0 6px;padding-left:22px}
+details.ht p{margin:0 0 8px}
 .toc a{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;text-decoration:none;color:var(--ink)}
 /* pamphlet */
 .pam{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
@@ -108,6 +113,7 @@ h3{margin:18px 0 6px;font-size:17px}
     <div class="acct" id="acct"></div>
     <nav class="tabs" aria-label="Sections">
       <a href="#tracker" data-tab="tracker">Tracker</a>
+      <a href="#howto" data-tab="howto">How to</a>
       <a href="#rules" data-tab="rules">Rulebook</a>
       <a href="#pamphlet" data-tab="pamphlet">Pamphlet</a>
     </nav>
@@ -144,6 +150,115 @@ h3{margin:18px 0 6px;font-size:17px}
     </div>
     <div class="card scroll"><table class="tbl" id="logTbl"></table></div>
     <p class="muted" style="font-size:13px">To remove a film, close its issue on GitHub. Only open issues count.</p>
+  </section>
+
+  <!-- HOW TO -->
+  <section class="view rules" id="v-howto" aria-labelledby="t-howto">
+    <h2 id="t-howto" style="margin-top:0">How to</h2>
+    <p>Everything you might need, step by step. Tap a question to open it.</p>
+    <nav class="toc" aria-label="How-to sections">
+      <a href="#h-start">Getting started</a><a href="#h-log">Logging films</a><a href="#h-insta">Instagram posts</a><a href="#h-bonus">Bonuses &amp; power-ups</a><a href="#h-spot">Spot-checks</a><a href="#h-score">Reading the scores</a><a href="#h-money">Fines &amp; the pot</a><a href="#h-phone">On your phone</a><a href="#h-help">Troubleshooting</a><a href="#h-admin">Site settings</a>
+    </nav>
+
+    <h3 id="h-start">Getting started</h3>
+    <details class="ht" open><summary>Make a GitHub account</summary>
+      <ol><li>Go to <a href="https://github.com/signup" target="_blank" rel="noopener">github.com/signup</a>.</li><li>Enter your email, a password and a username, then verify your email.</li><li>The free plan is all you need. Note your <strong>username</strong>: it's how the site knows it's you.</li></ol></details>
+    <details class="ht"><summary>Get your account added to the challenge</summary>
+      <ol><li>Send your GitHub username to Sinjini.</li><li>She adds it to the site settings (see <a href="#h-admin">Site settings</a>).</li><li>Check the scoreboard on the Tracker tab: your username appears under your name. Until it does, your entries won't count.</li></ol></details>
+    <details class="ht"><summary>Find your GitHub username</summary>
+      <ol><li>Sign in at github.com.</li><li>Tap your profile picture (top right).</li><li>Your username is the bold name at the top of the menu, also shown in your profile link: github.com/<em>username</em>.</li></ol></details>
+    <details class="ht"><summary>Before 1 December: the kickoff checklist</summary>
+      <ol><li>Read the Rulebook and agree in the chat.</li><li>Declare your Week 3 director in the chat.</li><li>Send your opponent their 3 assigned films in the chat.</li><li>Make sure your GitHub username shows on the scoreboard.</li><li>Pick your first film for 1 December.</li></ol></details>
+
+    <h3 id="h-log">Logging films</h3>
+    <details class="ht" open><summary>Log a film</summary>
+      <ol>
+        <li><strong>Post on Instagram first</strong>, within 24 hours of watching. Copy the post's link (see <a href="#h-insta">Instagram posts</a>).</li>
+        <li><strong>Tap “+ Log a film”</strong> on the Tracker tab. A form opens on GitHub. Sign in if asked, with your challenge account.</li>
+        <li><strong>Fill in the form:</strong>
+          <ul><li><strong>Movie</strong> and <strong>Year of release</strong></li><li><strong>Watched on:</strong> pick the date from the list</li><li><strong>Instagram post link:</strong> paste your link</li><li><strong>Post type:</strong> Reel (+2) or Carousel</li><li><strong>Extra proof:</strong> optional. Drag in photos or add a note.</li><li><strong>Extras:</strong> tick any that apply</li></ul></li>
+        <li><strong>Tap “Submit new issue”</strong> at the bottom.</li>
+        <li><strong>Come back and tap “Refresh”.</strong> The film shows in the log with its points.</li>
+      </ol></details>
+    <details class="ht"><summary>Which “Extras” boxes to tick</summary>
+      <ul><li><strong>Rewatch:</strong> you'd seen it before. Counts as half a film.</li><li><strong>Short under 40 min:</strong> counts as half a film.</li><li><strong>Assigned by my opponent:</strong> it's one of the 3 films they gave you. +1.</li><li><strong>Fits this week's theme:</strong> 2 of these in a week earns +2. Check the theme in the Rulebook.</li></ul>
+      <p class="muted">Pre-1980 films get +1 automatically from the year you enter.</p></details>
+    <details class="ht"><summary>Fix a mistake in a film you logged</summary>
+      <ol><li>In the Film log, tap the film's <strong>#number</strong>. It opens on GitHub.</li><li>Tap the <strong>…</strong> menu on your entry, then <strong>Edit</strong>.</li><li>Change the text after the heading you need (keep the <code>###</code> headings as they are), then <strong>Update comment</strong>.</li><li>Tap <strong>Refresh</strong> on the site.</li></ol></details>
+    <details class="ht"><summary>Remove a film (logged by mistake, or a test)</summary>
+      <ol><li>Tap the film's <strong>#number</strong> in the Film log.</li><li>Scroll down and tap <strong>Close issue</strong>. Only open entries count.</li><li>Changed your mind? Open it again with <strong>Reopen issue</strong>.</li></ol></details>
+    <details class="ht"><summary>Log a film watched over two sittings</summary>
+      <p>Log it once, after you finish. Pick the date you finished. Both sittings must be within 48 hours.</p></details>
+    <details class="ht"><summary>Log a film you watched together</summary>
+      <p>Each of you logs it separately, with your own Instagram post. Pick “Watched together” in your extra proof note. It can't be spot-checked. If you debated it on a call, also claim the “Watched + debated together” side quest.</p></details>
+
+    <h3 id="h-insta">Instagram posts</h3>
+    <details class="ht"><summary>Make a reel</summary>
+      <ol><li>During the film, take screenshots or short clips of scenes you want to use.</li><li>In Instagram, tap <strong>+</strong> then <strong>Reel</strong>, and pick your screenshots and clips.</li><li>Add your take: text on screen, a voiceover or captions in your own words.</li><li>Share it to your profile. A reel earns +2.</li></ol></details>
+    <details class="ht"><summary>Make a carousel instead</summary>
+      <ol><li>Pick at least 4 screenshots from across the film: start, middle and end.</li><li>In Instagram, tap <strong>+</strong> then <strong>Post</strong>, and select several images.</li><li>In the caption, describe what's happening in each image, numbered 1, 2, 3, 4…</li><li>Share it. A carousel counts, but without the +2.</li></ol></details>
+    <details class="ht"><summary>Copy your post's link</summary>
+      <ol><li>Open the post on Instagram.</li><li>Tap the <strong>share</strong> (paper plane) icon or the <strong>…</strong> menu.</li><li>Tap <strong>Copy link</strong>, then paste it into the form.</li></ol></details>
+    <details class="ht"><summary>What not to do</summary>
+      <ul><li>Don't copy someone else's reel, review or captions: the film scores 0 and you lose 3 more points.</li><li>Don't delete the post before 31 December: your opponent may check it.</li><li>Don't post spoilers for a film on your opponent's assigned list.</li></ul></details>
+
+    <h3 id="h-bonus">Bonuses &amp; power-ups</h3>
+    <details class="ht"><summary>Claim a side quest</summary>
+      <ol><li>Tap <strong>“Claim a bonus”</strong> on the Tracker tab.</li><li>Pick the side quest, add proof or a note, and submit.</li><li>Each side quest counts once. Its points show under your name in “Bonuses and spot-checks”.</li></ol></details>
+    <details class="ht"><summary>Use your Sick Day Pass</summary>
+      <ol><li>Before Sunday midnight of the week you'll miss, tap <strong>“Claim a bonus”</strong>.</li><li>Pick <strong>Power-up: Sick Day Pass</strong> and choose the week.</li><li>Submit and tell your opponent. That week's fine and −3 are cancelled. You only get one.</li></ol></details>
+    <details class="ht"><summary>Play Double or Nothing</summary>
+      <ol><li>Before a weekend, announce in the chat: “Double or Nothing: 4 films by Sunday.”</li><li>On Sunday night, tap <strong>“Claim a bonus”</strong>.</li><li>Pick <strong>won (+3)</strong> if you watched 4, or <strong>lost (−3)</strong> if you didn't. Be honest: your log shows it anyway.</li></ol></details>
+    <details class="ht"><summary>Assign films, and use your Veto</summary>
+      <ol><li>Send your opponent 3 films in the chat before 1 December. Choose wisely.</li><li>When they watch one, they tick <strong>Assigned by my opponent</strong> when logging it (+1).</li><li>To veto one, say so in the chat. Your opponent then sends a replacement. One veto each.</li></ol></details>
+
+    <h3 id="h-spot">Spot-checks</h3>
+    <details class="ht"><summary>Run a spot-check</summary>
+      <ol><li>Pick a film your opponent logged in the last 48 hours that you know well.</li><li>In the chat, ask <strong>two questions about what happens</strong> (not background details). They have 2 minutes, no googling.</li><li>One right, or roughly right, is a pass.</li></ol></details>
+    <details class="ht"><summary>Record the result</summary>
+      <ol><li>Note the film's <strong>#number</strong> from the Film log.</li><li>Tap <strong>“Report a spot-check”</strong>, enter the number, pick Failed or Passed, and write your two questions.</li><li>Submit and Refresh. A fail shows on their film: it scores 0 and costs them 2 more points. Each player's first 3 reports count.</li></ol></details>
+    <details class="ht"><summary>If you're spot-checked</summary>
+      <p>Answer in the chat within 2 minutes. Describe what happens in your own words; exact details aren't needed. If you think the questions broke the rules (background details, older than 48 hours), say so in the chat before they file it.</p></details>
+
+    <h3 id="h-score">Reading the scores</h3>
+    <details class="ht"><summary>What the scorecard numbers mean</summary>
+      <ul><li><strong>Films of 25:</strong> your film count. Rewatches and shorts add half.</li><li><strong>Final score:</strong> film points + bonuses − 3 for each missed week. Highest on 31 Dec wins.</li><li><strong>Film points:</strong> points from your films alone.</li><li><strong>Bonuses:</strong> theme weeks, side quests and Double or Nothing.</li><li><strong>Owes the pot:</strong> your total fines so far.</li><li><strong>LEADING:</strong> who's ahead on score (ties go to more films).</li></ul></details>
+    <details class="ht"><summary>What the weekly check means</summary>
+      <ul><li><strong>Upcoming:</strong> the week hasn't started.</li><li><strong>In progress:</strong> the week is on; keep watching.</li><li><strong>Done:</strong> you met the minimum.</li><li><strong>Missed · ₹amount:</strong> you fell short; that's your fine for the week.</li><li><strong>Sick Day Pass:</strong> missed, but covered.</li><li><strong>Theme done +2:</strong> 2 or more theme films that week.</li></ul></details>
+    <details class="ht"><summary>See only one player's films</summary>
+      <p>Above the Film log, tap <strong>Sinjini</strong> or <strong>Sankalp</strong>. Tap <strong>Everyone</strong> to see both again.</p></details>
+
+    <h3 id="h-money">Fines &amp; the pot</h3>
+    <details class="ht"><summary>How fines are worked out</summary>
+      <p>Each week ends Sunday at midnight. For every film you're short of the minimum (5, or 3 in week 5), you owe ₹200. Half films count, so 4.5 of 5 costs ₹100. The site works it out on its own.</p></details>
+    <details class="ht"><summary>Pay into the pot</summary>
+      <ol><li>Check “Owes the pot” on your scorecard on Monday.</li><li>Pay that week's amount within 48 hours, the way you both agreed (for example UPI to whoever holds the pot).</li><li>Post the payment screenshot in the chat. Late payments double.</li></ol></details>
+    <details class="ht"><summary>What happens on 31 December</summary>
+      <ol><li>Final scores lock at 11:59 pm.</li><li>The lower score is the loser and faces the loser's fate (see the Rulebook).</li><li>If you both hit 25 films, nobody's punished and the pot pays for a movie night.</li></ol></details>
+
+    <h3 id="h-phone">On your phone</h3>
+    <details class="ht"><summary>Add the site to your home screen</summary>
+      <ul><li><strong>iPhone (Safari):</strong> open the site, tap the share icon, then <strong>Add to Home Screen</strong>.</li><li><strong>Android (Chrome):</strong> open the site, tap <strong>⋮</strong>, then <strong>Add to Home screen</strong>.</li></ul></details>
+    <details class="ht"><summary>Log from your phone</summary>
+      <p>The forms work in your phone's browser. Make sure you're signed in to github.com there with your challenge account. If the GitHub app opens instead, that works too.</p></details>
+    <details class="ht"><summary>Download the pamphlet</summary>
+      <p>Open the <strong>Pamphlet</strong> tab and tap <strong>Download PDF</strong> or <strong>Download image</strong>. The image is easiest to share on WhatsApp.</p></details>
+
+    <h3 id="h-help">Troubleshooting</h3>
+    <details class="ht"><summary>My film isn't showing</summary>
+      <ol><li>Tap <strong>Refresh</strong>.</li><li>Check you submitted from your challenge account. Entries from other accounts are ignored (the site says how many).</li><li>Check the issue is still open, not closed.</li><li>Check the date is in December 2026.</li></ol></details>
+    <details class="ht"><summary>The points look wrong</summary>
+      <ol><li>Open the film's #number and check the year, post type and Extras ticks.</li><li>Edit the entry if something's off, then Refresh.</li><li>Check whether a failed spot-check is marked on it.</li></ol></details>
+    <details class="ht"><summary>“GitHub is limiting requests”</summary>
+      <p>GitHub allows a limited number of updates per hour from one network. Wait a few minutes and tap Refresh. Your entries are safe; only the display is paused.</p></details>
+    <details class="ht"><summary>The “Log a film” button asks me to sign in</summary>
+      <p>Sign in to GitHub with your challenge account, then tap the button again.</p></details>
+
+    <h3 id="h-admin">Site settings (for Sinjini)</h3>
+    <details class="ht"><summary>Add or change a player's GitHub username</summary>
+      <ol><li>In the repo, open <code>config.js</code>.</li><li>Change the <code>github:</code> value for that player, keeping the quotes.</li><li>Commit and push (or edit it on github.com with the pencil icon and <strong>Commit changes</strong>).</li><li>The site updates within a couple of minutes.</li></ol></details>
+    <details class="ht"><summary>Keep your token safe</summary>
+      <p>Never commit a token or password to the repo. Keep <code>token.txt</code> listed in <code>.gitignore</code>, or delete it once your Mac has saved the token. If a token is ever pushed, delete it on GitHub right away and make a new one.</p></details>
   </section>
 
   <!-- RULEBOOK -->
