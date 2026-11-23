@@ -17,7 +17,6 @@
     { id: "country", match: "brand-new country", label: "A brand-new country for both", pts: 2 },
     { id: "marathon", match: "3 films in one day", label: "3 films in one day", pts: 3 },
     { id: "together", match: "debated together", label: "Watched + debated together", pts: 2 },
-    { id: "reel", match: "reel or carousel", label: "Posted a reel or carousel", pts: 3 },
     { id: "convert", match: "converted a friend", label: "Converted a friend", pts: 2 }
   ];
   var S = { films: [], bonuses: [], spots: [], ignored: 0, filter: "all", loaded: false, error: "", updated: null };
@@ -67,6 +66,18 @@
     });
     return out;
   }
+  function proofText(sec) {
+    for (var k in sec) if (k.indexOf("extra proof") === 0 || k.indexOf("proof photos") === 0 || k.indexOf("proof link") === 0) return sec[k] || "";
+    return "";
+  }
+  function proofParts(note) {
+    var urls = [], txt = String(note || "");
+    txt = txt.replace(/<img[^>]*src="(https:\/\/[^"]+)"[^>]*>/gi, function (_, u) { urls.push(u); return " "; });
+    txt = txt.replace(/!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/g, function (_, u) { urls.push(u); return " "; });
+    txt = txt.replace(/\[[^\]]*\]\((https:\/\/[^)\s]+)\)/g, function (_, u) { urls.push(u); return " "; });
+    txt = txt.replace(/https:\/\/[^\s)<>"]+/g, function (u) { urls.push(u); return " "; });
+    return { urls: urls, text: txt.replace(/\s+/g, " ").trim() };
+  }
   function checked(text, word) {
     var lines = String(text || "").split("\n");
     for (var i = 0; i < lines.length; i++) { var l = lines[i].toLowerCase(); if (l.indexOf("[x]") >= 0 && l.indexOf(word) >= 0) return true; }
@@ -87,10 +98,12 @@
         var y = parseInt(sec["year of release"], 10);
         films.push(Object.assign(base, {
           title: sec["movie"] || "Untitled", year: isNaN(y) ? null : y,
-          date: String(sec["watched on"] || "").slice(0, 10), proof: sec["proof"] || "",
-          note: sec["proof link and 3-line review"] || "",
+          date: String(sec["watched on"] || "").slice(0, 10),
+          insta: String(sec["instagram post link"] || "").trim(),
+          proof: sec["post type"] ? (/^reel/i.test(sec["post type"]) ? "Instagram reel" : "Instagram carousel") : (sec["proof"] || ""),
+          note: proofText(sec),
           rewatch: checked(flags, "rewatch"), short: checked(flags, "short under"), assigned: checked(flags, "assigned"),
-          review: checked(flags, "review posted"), theme: checked(flags, "theme")
+          review: /^reel/i.test(sec["post type"] || "") || checked(flags, "review posted"), theme: checked(flags, "theme")
         }));
       } else if (isBonus) {
         var wk = String(sec["which week? (needed for sick day pass)"] || "").match(/Week\s*(\d)/i);
@@ -217,16 +230,20 @@
     rows.forEach(function (f) {
       var p = pinfo(f.player) || { name: "?", cls: "" };
       var tags = el("div", { cls: "tags" });
-      [["rewatch", "Rewatch"], ["short", "Short"], ["assigned", "Assigned"], ["review", "Reviewed"], ["theme", "Theme"]].forEach(function (x) { if (f[x[0]]) tags.appendChild(el("span", { cls: "tag", text: x[1] })); });
+      [["rewatch", "Rewatch"], ["short", "Short"], ["assigned", "Assigned"], ["review", "Reel +2"], ["theme", "Theme"]].forEach(function (x) { if (f[x[0]]) tags.appendChild(el("span", { cls: "tag", text: x[1] })); });
       if (f.year && f.year < 1980) tags.appendChild(el("span", { cls: "tag", text: "Pre-1980" }));
       if (f.failed) tags.appendChild(el("span", { cls: "pill bad", text: "Failed spot-check" }));
-      var m = String(f.note || "").match(/https:\/\/\S+/);
-      var noteTxt = String(f.note || "").replace(/https:\/\/\S+/, "").trim();
+      var pp = proofParts(f.note), noteTxt = pp.text;
+      var ig = /^https:\/\/(www\.)?instagram\.com\//i.test(f.insta) ? f.insta : (/^(www\.)?instagram\.com\//i.test(f.insta) ? "https://" + f.insta : "");
+      var linkKids = [];
+      if (ig) linkKids.push(el("a", { href: ig, target: "_blank", rel: "noopener noreferrer", text: "Instagram post" }));
+      pp.urls.slice(0, 3).forEach(function (u, i) { linkKids.push(el("a", { href: u, target: "_blank", rel: "noopener noreferrer", text: "Extra " + (i + 1) })); });
+      var links = linkKids.length ? el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" }, linkKids) : el("span", { cls: "pill bad", text: "No post" });
       t.appendChild(el("tr", null, [
         el("td", { text: f.date ? fmtDate(f.date) : "?" }),
         el("td", null, [el("span", { cls: "pill " + p.cls, text: p.name })]),
         el("td", null, [el("strong", { text: f.title }), f.year ? el("span", { cls: "muted", text: " (" + f.year + ")" }) : null, tags]),
-        el("td", null, [el("div", { style: "font-size:13px", text: f.proof }), m ? el("a", { href: m[0], target: "_blank", rel: "noopener noreferrer", text: "Proof link" }) : null, noteTxt ? el("div", { cls: "muted", style: "font-size:13px;max-width:280px", text: noteTxt.length > 140 ? noteTxt.slice(0, 140) + "…" : noteTxt }) : null]),
+        el("td", null, [el("div", { style: "font-size:13px", text: f.proof }), links, noteTxt ? el("div", { cls: "muted", style: "font-size:13px;max-width:280px", text: noteTxt.length > 140 ? noteTxt.slice(0, 140) + "…" : noteTxt }) : null]),
         el("td", { style: "font-weight:700;white-space:nowrap", text: (filmPoints(f) > 0 ? "+" : "") + num(filmPoints(f)) }),
         el("td", null, [el("a", { href: f.url, target: "_blank", rel: "noopener", text: "#" + f.num })])
       ]));

@@ -1,5 +1,5 @@
 name: "🔍 Report a spot-check"
-description: Record a spot-check you ran on your opponent's film.
+description: "Fair-play rules: ask about what happens (not background details), two questions, they pass with one right, only within 48 hours of the film being logged, and you must know the answer yourself."
 title: "[Spot-check] "
 labels: ["spot-check"]
 body:
@@ -16,11 +16,11 @@ body:
     attributes:
       label: Result
       options:
-        - "Failed: film scores 0 and -2 points"
-        - "Passed: they answered correctly"
+        - "Failed: got both questions wrong (film scores 0 and -2 points)"
+        - "Passed: got at least one right"
     validations:
       required: true
   - type: textarea
     id: question
     attributes:
-      label: The question you asked
+      label: The two questions you asked

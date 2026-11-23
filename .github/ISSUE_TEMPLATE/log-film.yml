@@ -53,22 +53,28 @@ body:
         - "2026-12-31 (Thu)"
     validations:
       required: true
-  - type: dropdown
-    id: proof
+  - type: input
+    id: insta
     attributes:
-      label: Proof
+      label: Instagram post link
+      description: Your reel or carousel about this film. It must be posted within 24 hours of watching.
+      placeholder: https://www.instagram.com/reel/...
+    validations:
+      required: true
+  - type: dropdown
+    id: posttype
+    attributes:
+      label: Post type
       options:
-        - Mid-film photo
-        - Watch history
-        - Theatre ticket
-        - Watched together
+        - "Reel (+2)"
+        - "Carousel: 4+ screenshots, each captioned with the scene"
     validations:
       required: true
   - type: textarea
     id: review
     attributes:
-      label: Proof link and 3-line review
-      description: Mention one detail from the middle of the film.
+      label: Extra proof (optional)
+      description: Any extra photos or notes. Drag photos into this box.
   - type: checkboxes
     id: flags
     attributes:
@@ -77,5 +83,4 @@ body:
         - label: Rewatch (counts as half)
         - label: Short under 40 min (counts as half)
         - label: Assigned by my opponent (+1)
-        - label: Review posted on my page (+2)
         - label: Fits this week's theme
