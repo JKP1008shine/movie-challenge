@@ -40,11 +40,11 @@
   /* ---------- tabs ---------- */
   function showTab() {
     var h = (location.hash || "#tracker").slice(1);
-    var t = h.indexOf("r-") === 0 ? "rules" : h;
-    if (["tracker", "rules", "pamphlet"].indexOf(t) < 0) t = "tracker";
+    var t = h.indexOf("r-") === 0 ? "rules" : (h.indexOf("h-") === 0 ? "howto" : h);
+    if (["tracker", "howto", "rules", "pamphlet"].indexOf(t) < 0) t = "tracker";
     document.querySelectorAll(".tabs a").forEach(function (a) { if (a.dataset.tab === t) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     document.querySelectorAll("section.view").forEach(function (s) { s.classList.toggle("on", s.id === "v-" + t); });
-    if (h.indexOf("r-") === 0) { var tg = $(h); if (tg) tg.scrollIntoView(); }
+    if (h.indexOf("r-") === 0 || h.indexOf("h-") === 0) { var tg = $(h); if (tg) tg.scrollIntoView(); }
   }
   window.addEventListener("hashchange", showTab); showTab();
 
