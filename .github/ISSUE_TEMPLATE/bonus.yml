@@ -1,0 +1,37 @@
+name: "⭐ Claim a bonus or power-up"
+description: Side quests, Sick Day Pass and Double or Nothing.
+title: "[Bonus] "
+labels: ["bonus"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What are you claiming?
+      options:
+        - "Side quest: Watched a film in a theatre (+2)"
+        - "Side quest: Watched a silent film (+2)"
+        - "Side quest: Watched a 3-hour+ film (+2)"
+        - "Side quest: A brand-new country for both (+2)"
+        - "Side quest: 3 films in one day (+3)"
+        - "Side quest: Watched + debated together (+2)"
+        - "Side quest: Posted a reel or carousel (+3)"
+        - "Side quest: Converted a friend (+2)"
+        - "Power-up: Sick Day Pass"
+        - "Power-up: Double or Nothing won (+3)"
+        - "Power-up: Double or Nothing lost (-3)"
+    validations:
+      required: true
+  - type: dropdown
+    id: week
+    attributes:
+      label: Which week? (needed for Sick Day Pass)
+      options:
+        - "Week 1 (1-6 Dec)"
+        - "Week 2 (7-13 Dec)"
+        - "Week 3 (14-20 Dec)"
+        - "Week 4 (21-27 Dec)"
+        - "Week 5 (28-31 Dec)"
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof or note

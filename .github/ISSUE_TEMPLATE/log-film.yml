@@ -1,0 +1,81 @@
+name: "🎬 Log a film"
+description: Add a film you watched to the challenge log.
+title: "[Film] "
+labels: ["film"]
+body:
+  - type: input
+    id: movie
+    attributes:
+      label: Movie
+      placeholder: e.g. Tokyo Story
+    validations:
+      required: true
+  - type: input
+    id: year
+    attributes:
+      label: Year of release
+      placeholder: e.g. 1953
+  - type: dropdown
+    id: date
+    attributes:
+      label: Watched on
+      options:
+        - "2026-12-01 (Tue)"
+        - "2026-12-02 (Wed)"
+        - "2026-12-03 (Thu)"
+        - "2026-12-04 (Fri)"
+        - "2026-12-05 (Sat)"
+        - "2026-12-06 (Sun)"
+        - "2026-12-07 (Mon)"
+        - "2026-12-08 (Tue)"
+        - "2026-12-09 (Wed)"
+        - "2026-12-10 (Thu)"
+        - "2026-12-11 (Fri)"
+        - "2026-12-12 (Sat)"
+        - "2026-12-13 (Sun)"
+        - "2026-12-14 (Mon)"
+        - "2026-12-15 (Tue)"
+        - "2026-12-16 (Wed)"
+        - "2026-12-17 (Thu)"
+        - "2026-12-18 (Fri)"
+        - "2026-12-19 (Sat)"
+        - "2026-12-20 (Sun)"
+        - "2026-12-21 (Mon)"
+        - "2026-12-22 (Tue)"
+        - "2026-12-23 (Wed)"
+        - "2026-12-24 (Thu)"
+        - "2026-12-25 (Fri)"
+        - "2026-12-26 (Sat)"
+        - "2026-12-27 (Sun)"
+        - "2026-12-28 (Mon)"
+        - "2026-12-29 (Tue)"
+        - "2026-12-30 (Wed)"
+        - "2026-12-31 (Thu)"
+    validations:
+      required: true
+  - type: dropdown
+    id: proof
+    attributes:
+      label: Proof
+      options:
+        - Mid-film photo
+        - Watch history
+        - Theatre ticket
+        - Watched together
+    validations:
+      required: true
+  - type: textarea
+    id: review
+    attributes:
+      label: Proof link and 3-line review
+      description: Mention one detail from the middle of the film.
+  - type: checkboxes
+    id: flags
+    attributes:
+      label: Extras
+      options:
+        - label: Rewatch (counts as half)
+        - label: Short under 40 min (counts as half)
+        - label: Assigned by my opponent (+1)
+        - label: Review posted on my page (+2)
+        - label: Fits this week's theme

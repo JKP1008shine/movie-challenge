@@ -1,0 +1,26 @@
+name: "🔍 Report a spot-check"
+description: Record a spot-check you ran on your opponent's film.
+title: "[Spot-check] "
+labels: ["spot-check"]
+body:
+  - type: input
+    id: film
+    attributes:
+      label: Film issue number
+      description: The number of your opponent's film issue, like 12
+      placeholder: "12"
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - "Failed: film scores 0 and -2 points"
+        - "Passed: they answered correctly"
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: The question you asked

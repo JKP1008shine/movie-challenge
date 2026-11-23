@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>25 Films. 31 Days. — Sinjini vs Sankalp</title>
+<style>
+@font-face{font-family:"Anton";src:url("assets/Anton.ttf") format("truetype");font-display:swap}
+:root{--red:#B3261E;--red-d:#8A1C16;--tint:#FBEDEC;--ink:#1A1A1A;--mute:#5C5552;--line:#E4E0DE;--bg:#FAF8F7;--card:#fff;--ok:#1E6B3A;--okbg:#E6F2EA;--warn:#8A5A00;--warnbg:#FDF3DC;--p1:#6A3FB5;--p1bg:#EFE8FA;--p2:#0F6E6E;--p2bg:#E2F3F2}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.5}
+.disp{font-family:Anton,Impact,"Arial Narrow",sans-serif;font-weight:400;letter-spacing:.02em}
+a{color:var(--red)}a:hover{color:var(--red-d)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+/* top bar */
+.top{background:var(--red);color:#fff}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-top:14px;padding-bottom:0}
+.brand{font-size:28px;line-height:1;margin:0}
+.brand small{display:block;font-family:Inter,system-ui,sans-serif;font-size:12px;letter-spacing:.14em;font-weight:600;opacity:.9;margin-top:4px}
+.acct{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:14px}
+.acct img{width:30px;height:30px;border-radius:50%;border:2px solid #fff}
+.tabs{display:flex;gap:4px;width:100%;margin-top:10px;overflow-x:auto}
+.tabs a{color:#fff;text-decoration:none;padding:10px 16px;border-radius:10px 10px 0 0;font-weight:600;white-space:nowrap;opacity:.85}
+.tabs a[aria-current="page"]{background:var(--bg);color:var(--red);opacity:1}
+.strip{height:10px;background:var(--red);background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.85) 0 12px,transparent 12px 24px);background-size:24px 6px;background-repeat:repeat-x;background-position:0 2px}
+main{padding:24px 0 60px}
+section.view{display:none}
+section.view.on{display:block}
+h2{font-family:Anton,Impact,sans-serif;font-weight:400;letter-spacing:.03em;color:var(--red);font-size:26px;margin:28px 0 10px;line-height:1.15}
+h3{margin:18px 0 6px;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.note{background:var(--warnbg);color:#4A3500;border-radius:10px;padding:10px 14px;font-size:14px;margin:0 0 16px}
+.note.err{background:var(--tint);color:#5A100C}
+.muted{color:var(--mute)}
+.btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:600;min-height:44px}
+.btn:hover{background:var(--red-d)}
+.btn.ghost{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+.btn.small{min-height:34px;padding:6px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+/* scoreboard */
+.score{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pcard{background:#fff;border-radius:16px;border:2px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:12px}
+.pcard.p1{border-color:var(--p1)}.pcard.p2{border-color:var(--p2)}
+.pcard header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pname{font-family:Anton,Impact,sans-serif;font-size:30px;line-height:1}
+.p1 .pname{color:var(--p1)}.p2 .pname{color:var(--p2)}
+.lead{font-size:12px;font-weight:700;letter-spacing:.1em;background:var(--ink);color:#fff;border-radius:999px;padding:4px 10px}
+.bar{height:14px;background:#EEE9E7;border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px}
+.p1 .bar i{background:var(--p1)}.p2 .bar i{background:var(--p2)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.stat{background:var(--bg);border-radius:10px;padding:8px 10px}
+.stat b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:24px;line-height:1.15}
+.stat span{font-size:12px;color:var(--mute)}
+.owes b{color:var(--red)}
+/* tables */
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding:8px;border-bottom:2px solid var(--ink)}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.scroll{overflow-x:auto}
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)}
+.pill.bad{background:var(--tint);color:var(--red-d)}
+.pill.wip{background:var(--warnbg);color:var(--warn)}
+.pill.soon{background:#EEE;color:#555}
+.pill.p1{background:var(--p1bg);color:var(--p1)}
+.pill.p2{background:var(--p2bg);color:var(--p2)}
+/* form */
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
+.field input,.field select{border:1.5px solid #CFC8C5;border-radius:8px;padding:9px 10px;min-height:42px;background:#fff;font-weight:400}
+.field.wide{grid-column:span 2}
+.checks{display:flex;flex-wrap:wrap;gap:8px 16px;grid-column:1/-1}
+.checks label{display:flex;align-items:center;gap:6px;font-size:14px;min-height:32px}
+.checks input{width:18px;height:18px;accent-color:var(--red)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.filters button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;min-height:36px}
+.filters button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11px;border:1px solid #CFC8C5;border-radius:6px;padding:1px 6px;color:var(--mute)}
+.claim{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
+.claim button{min-height:72px;font-size:18px}
+.extras{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.qlist label{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:14px}
+.qlist label:last-child{border-bottom:none}
+.qlist input{width:18px;height:18px;accent-color:var(--red)}
+.qlist .pt{margin-left:auto;font-weight:700}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper output{min-width:36px;text-align:center;font-weight:700}
+/* rulebook */
+.rules{max-width:780px}
+.rules p,.rules li{max-width:70ch}
+.rules table{margin:8px 0 6px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.toc a{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;text-decoration:none;color:var(--ink)}
+/* pamphlet */
+.pam{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;align-items:start}
+.pam img{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.08);background:#fff}
+@media (max-width:760px){.score{grid-template-columns:1fr}.pam{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.field.wide{grid-column:auto}.brand{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="wrap">
+    <h1 class="brand disp">25 FILMS. 31 DAYS.<small>SINJINI vs SANKALP · 1–31 DEC 2026</small></h1>
+    <div class="acct" id="acct"></div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#tracker" data-tab="tracker">Tracker</a>
+      <a href="#rules" data-tab="rules">Rulebook</a>
+      <a href="#pamphlet" data-tab="pamphlet">Pamphlet</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+  <!-- TRACKER -->
+  <section class="view" id="v-tracker" aria-labelledby="t-tracker">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <h2 id="t-tracker" class="disp" style="margin:0">Scoreboard</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn" id="lnkFilm" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">+ Log a film</a>
+        <a class="btn ghost" id="lnkBonus" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Claim a bonus</a>
+        <a class="btn ghost" id="lnkSpot" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Report a spot-check</a>
+        <button class="btn ghost" type="button" id="refresh">Refresh</button>
+      </div>
+    </div>
+    <p class="muted" id="updated" style="font-size:13px;margin:6px 0 14px"></p>
+    <div id="status"></div>
+    <div class="score" id="score"></div>
+
+    <h2>Weekly check</h2>
+    <div class="card scroll"><table class="tbl" id="weekTbl"></table></div>
+
+    <h2>Bonuses and spot-checks</h2>
+    <div class="extras" id="extras"></div>
+
+    <h2>Film log</h2>
+    <div class="filters" id="filters">
+      <button type="button" data-f="all" aria-pressed="true">Everyone</button>
+      <button type="button" data-f="sinjini" aria-pressed="false">Sinjini</button>
+      <button type="button" data-f="sankalp" aria-pressed="false">Sankalp</button>
+    </div>
+    <div class="card scroll"><table class="tbl" id="logTbl"></table></div>
+    <p class="muted" style="font-size:13px">To remove a film, close its issue on GitHub. Only open issues count.</p>
+  </section>
+
+  <!-- RULEBOOK -->
+  <section class="view rules" id="v-rules" aria-labelledby="t-rules">
+    <h2 id="t-rules" style="margin-top:0">The Rulebook</h2>
+    <nav class="toc" aria-label="Rulebook sections">
+      <a href="#r-why">Why</a><a href="#r-basics">Basics</a><a href="#r-counts">What counts</a><a href="#r-themes">Themes</a><a href="#r-points">Points</a><a href="#r-proof">Proof</a><a href="#r-stakes">Stakes</a><a href="#r-power">Power-ups</a><a href="#r-kickoff">Kickoff</a>
+    </nav>
+
+    <h3 id="r-why">Why we're doing this</h3>
+    <p>We are cinephiles who stopped watching films. This month we fix that: 31 days, 25 films each, real money on the line, and zero tolerance for bluffing.</p>
+    <ol>
+      <li><strong>Get the habit back.</strong> Watching films should feel normal again, not like homework we keep postponing.</li>
+      <li><strong>Feed the page.</strong> Every film is a possible post. More watching means more to say.</li>
+      <li><strong>Become interesting again.</strong> Have opinions, hot takes and deep cuts ready for every conversation.</li>
+    </ol>
+
+    <h3 id="r-basics">The basics</h3>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>Rule</th><th>Detail</th></tr>
+      <tr><td>Dates</td><td>Tue 1 Dec to Thu 31 Dec 2026, midnight IST</td></tr>
+      <tr><td>Players</td><td>Sinjini vs Sankalp</td></tr>
+      <tr><td>Monthly goal</td><td>25 films each (about 6 a week)</td></tr>
+      <tr><td>Weekly minimum</td><td>5 films, checked every Sunday at midnight. Week 5 (28 to 31 Dec) needs only 3</td></tr>
+      <tr><td>Tracker</td><td>Log every film with the “Log a film” button. It opens a GitHub form; this site does all the counting</td></tr>
+      <tr><td>Winner</td><td>Highest final score on 31 Dec at 11:59 pm</td></tr>
+    </table></div>
+
+    <h3 id="r-counts">What counts as a film</h3>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>Type</th><th>Counts as</th></tr>
+      <tr><td>First-time watch of a feature film (40+ min)</td><td>1 film</td></tr>
+      <tr><td>Rewatch</td><td>½ film</td></tr>
+      <tr><td>Short film under 40 min</td><td>½ film</td></tr>
+      <tr><td>Documentary or animated feature</td><td>1 film</td></tr>
+      <tr><td>A TV episode, YouTube video essay or trailer</td><td>Nothing</td></tr>
+      <tr><td>A film watched in two sittings</td><td>1 film, if both sittings fall within 48 hours</td></tr>
+      <tr><td>At 2x speed, or mostly scrolled through on your phone</td><td>Nothing, and your opponent may call it out</td></tr>
+    </table></div>
+    <p>Golden rule: you must finish the film. A walk-out doesn't count.</p>
+
+    <h3 id="r-themes">Weekly themes</h3>
+    <p>At least 2 films each week must fit that week's theme. The rest are free picks.</p>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>Dates</th><th>Theme</th><th>The rule</th></tr>
+      <tr><td>1–6 Dec</td><td><strong>The Comeback</strong></td><td>Directors you used to love but stopped following</td></tr>
+      <tr><td>7–13 Dec</td><td><strong>World Tour</strong></td><td>Non-English films, a different country each time</td></tr>
+      <tr><td>14–20 Dec</td><td><strong>Director Deep Dive</strong></td><td>3+ films by one director you've never properly explored. Declare them before 1 Dec</td></tr>
+      <tr><td>21–27 Dec</td><td><strong>Decades Run</strong></td><td>One film each from the '60s, '70s, '80s, '90s and '00s</td></tr>
+      <tr><td>28–31 Dec</td><td><strong>2026 Catch-up</strong></td><td>This year's releases you missed. End by posting your top 10 of 2026</td></tr>
+    </table></div>
+
+    <h3 id="r-points">Points</h3>
+    <p>The film count decides who hit 25. Points decide who wins the month.</p>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>What you did</th><th>Points</th></tr>
+      <tr><td>Watched a film</td><td>+1</td></tr>
+      <tr><td>Rewatch or short</td><td>+0.5</td></tr>
+      <tr><td>Film released before 1980</td><td>+1 bonus</td></tr>
+      <tr><td>Watched a film your opponent assigned you</td><td>+1 bonus</td></tr>
+      <tr><td>Posted a full review of it on your page</td><td>+2 bonus</td></tr>
+      <tr><td>Completed the week's theme (2+ theme films)</td><td>+2 per week</td></tr>
+      <tr><td>Side quest completed</td><td>as listed</td></tr>
+      <tr><td>Missed the weekly minimum</td><td>−3</td></tr>
+      <tr><td>Failed a spot-check</td><td>film scores 0, and −2</td></tr>
+    </table></div>
+    <p>Example: a 1962 Japanese film your opponent assigned, then reviewed on your page = 1 + 1 + 1 + 2 = <strong>5 points</strong>.</p>
+
+    <h3 id="r-proof">Proof: no bluffing allowed</h3>
+    <p>Every film needs one piece of proof, posted in our chat. No proof, no points.</p>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>Proof type</th><th>What it looks like</th></tr>
+      <tr><td>Mid-film photo</td><td>A photo of the screen at a random moment in the middle, with your phone clock visible. End credits don't count</td></tr>
+      <tr><td>Watch history</td><td>A screenshot of your app's viewing activity showing the title and date</td></tr>
+      <tr><td>Theatre ticket</td><td>A photo of the ticket or booking</td></tr>
+      <tr><td>Watched together</td><td>On a call, a watch party, or in person</td></tr>
+    </table></div>
+    <p><strong>The 24-hour rule.</strong> Log the film within 24 hours with a review of at least 3 lines, mentioning one specific detail from the middle of the film.</p>
+    <p><strong>Spot-checks.</strong> Each player gets 3 for the month. Pick any film your opponent logged and ask one question about a mid-film scene.</p>
+    <ol>
+      <li>They have <strong>2 minutes</strong> to answer, with no googling.</li>
+      <li>A correct answer uses up your spot-check. Choose wisely.</li>
+      <li>A wrong answer or no answer: the film scores 0 and they lose 2 more points. File it with the “Report a spot-check” button.</li>
+      <li>You can't spot-check a film you watched together.</li>
+    </ol>
+
+    <h3 id="r-stakes">Stakes and punishments</h3>
+    <p><strong>The pot.</strong> Every film you are short of the weekly minimum costs ₹200, paid into a shared pot every Sunday night. Watch 3 of 5 and you pay ₹400 that week. Skip the whole month and you pay ₹4,600. A rewatch or short counts as half a film, so it saves ₹100. Pay within 48 hours, or that week's amount doubles. A missed week also costs 3 points.</p>
+    <p><strong>The final loser</strong> (lower score on 31 Dec):</p>
+    <ol>
+      <li><strong>Pays for a theatre outing</strong> for both of you, popcorn and drinks included. The pot covers part of it first.</li>
+      <li><strong>Watches the Punishment Film.</strong> The winner picks one notoriously bad or painfully long film. The loser watches all of it and posts a serious, full-length review, no sarcasm allowed.</li>
+      <li><strong>Gives up January.</strong> The winner chooses the loser's first 5 films of the next challenge.</li>
+      <li><strong>Changes their profile picture</strong> to a film still the winner chooses, for one week.</li>
+    </ol>
+    <p><strong>If you both hit 25 films,</strong> nobody is punished. The pot pays for a celebration movie night. The points winner still picks the film.</p>
+    <p><strong>Tie on points:</strong> more films wins. Still tied? A 10-question film trivia quiz written by someone neutral.</p>
+
+    <h3 id="r-power">Power-ups and side quests</h3>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>Power-up (one each)</th><th>What it does</th></tr>
+      <tr><td>Sick Day Pass</td><td>Skip one weekly minimum with no fine and no points penalty. Declare it before Sunday midnight</td></tr>
+      <tr><td>The Assignment</td><td>Your 3 assigned films are your weapon: pick long ones, old ones, or ones they've been avoiding</td></tr>
+      <tr><td>Veto</td><td>Reject one film your opponent assigns you, once. They must assign another</td></tr>
+      <tr><td>Double or Nothing</td><td>Before a weekend, declare you'll watch 4 films by Sunday. Do it: +3. Fail: −3</td></tr>
+    </table></div>
+    <div class="card scroll" style="margin-top:12px"><table class="tbl">
+      <tr><th>Side quest (once each)</th><th>Bonus</th></tr>
+      <tr><td>Watch a film in a theatre</td><td>+2</td></tr>
+      <tr><td>Watch a silent film</td><td>+2</td></tr>
+      <tr><td>Watch a film over 3 hours long</td><td>+2</td></tr>
+      <tr><td>A film from a country neither of you has seen a film from</td><td>+2</td></tr>
+      <tr><td>Marathon: 3 films in one day</td><td>+3</td></tr>
+      <tr><td>Watch one film together and debate it on a call</td><td>+2 each</td></tr>
+      <tr><td>Post a reel or carousel on your page about a challenge film</td><td>+3</td></tr>
+      <tr><td>Convince someone outside the challenge to watch a film you loved</td><td>+2</td></tr>
+    </table></div>
+
+    <h3 id="r-kickoff">Kickoff checklist and fair play</h3>
+    <ul>
+      <li>Both players read this rulebook and agree in the chat (a thumbs-up counts as signing)</li>
+      <li>Declare your Week 3 director</li>
+      <li>Assign your opponent their 3 films</li>
+      <li>Both players have a GitHub account, and their usernames are in the site settings</li>
+      <li>Pick the first film for 1 Dec</li>
+    </ul>
+    <p><strong>Fair play:</strong> no spoilers for films on the other's list. Settle disputes by talking first; the logger gets the benefit of the doubt once a month. Trash talk is encouraged, being mean is not. Rules change only if both agree, and never in the last week.</p>
+    <p class="disp" style="font-size:22px;color:var(--red)">LET THE GRIND BEGIN.</p>
+  </section>
+
+  <!-- PAMPHLET -->
+  <section class="view" id="v-pamphlet" aria-labelledby="t-pam">
+    <h2 id="t-pam" style="margin-top:0">The Pamphlet</h2>
+    <div class="pam">
+      <img src="assets/pamphlet.png" alt="One-page pamphlet of the December Movie Watching Challenge rules: scoring, proof, spot-checks, weekly themes, power-ups, side quests and the loser's fate">
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <p style="margin:0">Everything on one A4 page. Print it, pin it, or keep it on your phone.</p>
+        <a class="btn" href="assets/pamphlet.pdf" download="Movie-Challenge-Pamphlet.pdf" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center">Download PDF</a>
+        <a class="btn ghost" href="assets/pamphlet.png" download="Movie-Challenge-Pamphlet.png" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center">Download image (PNG)</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
