@@ -118,6 +118,7 @@ tr.wk-past td{opacity:.6}
     <div class="acct" id="acct"></div>
     <nav class="tabs" aria-label="Sections">
       <a href="#tracker" data-tab="tracker">Tracker</a>
+      <a href="#watch" data-tab="watch">Watchlists</a>
       <a href="#howto" data-tab="howto">How to</a>
       <a href="#rules" data-tab="rules">Rulebook</a>
       <a href="#pamphlet" data-tab="pamphlet">Pamphlet</a>
@@ -165,12 +166,26 @@ tr.wk-past td{opacity:.6}
     <p class="muted" style="font-size:13px">To remove a film, close its issue on GitHub. Only open issues count.</p>
   </section>
 
+  <!-- WATCHLISTS -->
+  <section class="view" id="v-watch" aria-labelledby="t-watch">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <h2 id="t-watch" style="margin:0">Watchlists &amp; picks</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn" id="lnkList" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Update my watchlist</a>
+        <a class="btn ghost" id="lnkPicks" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Assign films</a>
+        <a class="btn ghost" id="lnkVeto" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Veto a film</a>
+      </div>
+    </div>
+    <p class="muted" style="font-size:13px;margin:6px 0 14px">Films tick off on their own once they're logged with the same title. Tap Refresh on the Tracker to update.</p>
+    <div class="score" id="watchBox"></div>
+  </section>
+
   <!-- HOW TO -->
   <section class="view rules" id="v-howto" aria-labelledby="t-howto">
     <h2 id="t-howto" style="margin-top:0">How to</h2>
     <p>Everything you might need, step by step. Tap a question to open it.</p>
     <nav class="toc" aria-label="How-to sections">
-      <a href="#h-start">Getting started</a><a href="#h-log">Logging films</a><a href="#h-insta">Instagram posts</a><a href="#h-bonus">Bonuses &amp; power-ups</a><a href="#h-spot">Spot-checks</a><a href="#h-score">Reading the scores</a><a href="#h-money">Fines, the pot &amp; violations</a><a href="#h-phone">On your phone</a><a href="#h-help">Troubleshooting</a>
+      <a href="#h-start">Getting started</a><a href="#h-log">Logging films</a><a href="#h-watch">Watchlists &amp; picks</a><a href="#h-insta">Instagram posts</a><a href="#h-bonus">Bonuses &amp; power-ups</a><a href="#h-spot">Spot-checks</a><a href="#h-score">Reading the scores</a><a href="#h-money">Fines, the pot &amp; violations</a><a href="#h-phone">On your phone</a><a href="#h-help">Troubleshooting</a>
     </nav>
 
     <h3 id="h-start">Getting started</h3>
@@ -204,6 +219,14 @@ tr.wk-past td{opacity:.6}
       <p>Log it once, after you finish. Pick the date you finished. Both sittings must be within 48 hours.</p></details>
     <details class="ht"><summary>Log a film you watched together</summary>
       <p>Each of you logs it separately, with your own Instagram post. Pick “Watched together” in your extra proof note. It can't be spot-checked. If you debated it on a call, also claim the “Watched + debated together” side quest.</p></details>
+
+    <h3 id="h-watch">Watchlists, picks &amp; vetoes</h3>
+    <details class="ht"><summary>Add or update your watchlist</summary>
+      <ol><li>Open the <strong>Watchlists</strong> tab and tap <strong>“Update my watchlist”</strong>.</li><li>Enter your Week 3 director, then your films, one per line. Add the week or a note after a dash, like <em>Tokyo Story (1953) - Week 1</em>.</li><li>Submit. To change it later, tap <strong>edit</strong> next to your list, then the <strong>…</strong> menu and <strong>Edit</strong>. Your most recent list is the one shown.</li><li>Films tick off by themselves once you log them with the same title.</li></ol></details>
+    <details class="ht"><summary>Assign your opponent their 3 films</summary>
+      <ol><li>On the Watchlists tab, tap <strong>“Assign films”</strong>.</li><li>Enter your 3 picks and an optional note, then submit.</li><li>They show on your opponent's card as <strong>To watch</strong>, then <strong>Watched</strong> once logged.</li></ol></details>
+    <details class="ht"><summary>Veto a film, and replace a vetoed pick</summary>
+      <ol><li>To veto, tap <strong>“Veto a film”</strong> and type the title exactly as it appears in their picks. You get one.</li><li>The film shows as <strong>Vetoed</strong>, with a note that a replacement is needed.</li><li>To replace it, the picker taps <strong>“Assign films”</strong> again and submits all 3 picks, with the new one swapped in. The latest picks count.</li></ol></details>
 
     <h3 id="h-insta">Instagram posts</h3>
     <details class="ht"><summary>Make a reel</summary>

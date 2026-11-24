@@ -1,0 +1,28 @@
+name: "🎯 Assign films to my opponent"
+description: Pick the 3 films your opponent must watch. Submit again to replace a vetoed film; your latest picks count.
+title: "[Picks] "
+labels: ["picks"]
+body:
+  - type: input
+    id: f1
+    attributes:
+      label: Pick 1
+      placeholder: e.g. Seven Samurai (1954)
+    validations:
+      required: true
+  - type: input
+    id: f2
+    attributes:
+      label: Pick 2
+    validations:
+      required: true
+  - type: input
+    id: f3
+    attributes:
+      label: Pick 3
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: Note for your opponent

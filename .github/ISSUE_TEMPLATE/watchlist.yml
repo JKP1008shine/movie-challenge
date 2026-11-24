@@ -1,0 +1,20 @@
+name: "📋 Update my watchlist"
+description: Your list of films for the challenge, and your Week 3 director.
+title: "[Watchlist] "
+labels: ["watchlist"]
+body:
+  - type: input
+    id: director
+    attributes:
+      label: Week 3 director
+      placeholder: e.g. Satyajit Ray
+  - type: textarea
+    id: list
+    attributes:
+      label: My watchlist
+      description: "One film per line. You can add the week or a note after a dash, for example: Tokyo Story (1953) - Week 1"
+      placeholder: |
+        Tokyo Story (1953) - Week 1
+        Parasite (2019) - Week 2, South Korea
+    validations:
+      required: true

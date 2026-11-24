@@ -1,0 +1,16 @@
+name: "✋ Veto an assigned film"
+description: Reject one film your opponent assigned you. You get one veto.
+title: "[Veto] "
+labels: ["veto"]
+body:
+  - type: input
+    id: film
+    attributes:
+      label: Film you're vetoing
+      description: Type the title exactly as it appears in their picks.
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason (optional)

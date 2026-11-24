@@ -41,7 +41,7 @@
   function showTab() {
     var h = (location.hash || "#tracker").slice(1);
     var t = h.indexOf("r-") === 0 ? "rules" : (h.indexOf("h-") === 0 ? "howto" : h);
-    if (["tracker", "howto", "rules", "pamphlet"].indexOf(t) < 0) t = "tracker";
+    if (["tracker", "watch", "howto", "rules", "pamphlet"].indexOf(t) < 0) t = "tracker";
     document.querySelectorAll(".tabs a").forEach(function (a) { if (a.dataset.tab === t) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     document.querySelectorAll("section.view").forEach(function (s) { s.classList.toggle("on", s.id === "v-" + t); });
     if (h.indexOf("r-") === 0 || h.indexOf("h-") === 0) { var tg = $(h); if (tg) tg.scrollIntoView(); }
@@ -55,6 +55,9 @@
   $("lnkSpot").href = base + "spot-check.yml";
   $("lnkPay").href = base + "payment.yml";
   $("lnkViol").href = base + "violation.yml";
+  $("lnkList").href = base + "watchlist.yml";
+  $("lnkPicks").href = base + "assign.yml";
+  $("lnkVeto").href = base + "veto.yml";
   var acct = $("acct");
   acct.appendChild(el("a", { href: "https://github.com/" + REPO + "/issues", target: "_blank", rel: "noopener", style: "color:#fff", text: "All entries on GitHub ↗" }));
 
@@ -80,13 +83,23 @@
     txt = txt.replace(/https:\/\/[^\s)<>"]+/g, function (u) { urls.push(u); return " "; });
     return { urls: urls, text: txt.replace(/\s+/g, " ").trim() };
   }
+  function parseList(text) {
+    return String(text || "").split("\n").map(function (l) {
+      l = l.replace(/^\s*(?:[-*•]\s*(?:\[[ xX]\]\s*)?|\d+[.)]\s*)/, "").trim();
+      if (!l) return null;
+      var m = l.split(/\s+[-–—]\s+/);
+      return { title: m[0].slice(0, 120), note: m.slice(1).join(" - ").slice(0, 120) };
+    }).filter(Boolean).slice(0, 80);
+  }
+  function norm(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\(\s*\d{4}\s*\)/g, "").replace(/[^a-z0-9]+/g, " ").replace(/^\s*the\s+/, "").trim(); }
+  function watchedBy(key, title) { var n = norm(title); return !!n && S.films.some(function (f) { return f.player === key && !f.copied && norm(f.title) === n; }); }
   function checked(text, word) {
     var lines = String(text || "").split("\n");
     for (var i = 0; i < lines.length; i++) { var l = lines[i].toLowerCase(); if (l.indexOf("[x]") >= 0 && l.indexOf(word) >= 0) return true; }
     return false;
   }
   function classify(issues) {
-    var films = [], bonuses = [], spots = [], payments = [], violations = [], ignored = 0;
+    var films = [], bonuses = [], spots = [], payments = [], violations = [], lists = [], picks = [], vetoes = [], ignored = 0;
     issues.forEach(function (is) {
       if (is.pull_request) return;
       var player = playerOf(is.user && is.user.login);
@@ -94,7 +107,8 @@
       var base = { num: is.number, url: is.html_url, player: player, at: is.created_at || "" };
       var isFilm = "movie" in sec, isBonus = "what are you claiming?" in sec, isPay = "amount paid (₹)" in sec, isViol = "what's the violation?" in sec;
       var isSpot = !isViol && "film issue number" in sec;
-      if (!isFilm && !isBonus && !isSpot && !isPay && !isViol) return;
+      var isList = "my watchlist" in sec, isPicks = "pick 1" in sec, isVeto = "film you're vetoing" in sec;
+      if (!isFilm && !isBonus && !isSpot && !isPay && !isViol && !isList && !isPicks && !isVeto) return;
       if (!player) { ignored++; return; }
       if (isFilm) {
         var flags = sec["extras"] || "";
@@ -111,6 +125,12 @@
       } else if (isBonus) {
         var wk = String(sec["which week? (needed for sick day pass)"] || "").match(/Week\s*(\d)/i);
         bonuses.push(Object.assign(base, { kind: String(sec["what are you claiming?"] || ""), week: wk ? parseInt(wk[1], 10) - 1 : -1 }));
+      } else if (isList) {
+        lists.push(Object.assign(base, { director: String(sec["week 3 director"] || "").slice(0, 80), items: parseList(sec["my watchlist"]) }));
+      } else if (isPicks) {
+        picks.push(Object.assign(base, { films: [sec["pick 1"], sec["pick 2"], sec["pick 3"]].map(function (x) { return String(x || "").trim().slice(0, 120); }).filter(Boolean), note: String(sec["note for your opponent"] || "").slice(0, 300) }));
+      } else if (isVeto) {
+        vetoes.push(Object.assign(base, { film: String(sec["film you're vetoing"] || "").trim().slice(0, 120), reason: String(sec["reason (optional)"] || "").slice(0, 300) }));
       } else if (isPay) {
         var pw = String(sec["week you're paying for"] || "").match(/Week\s*(\d)/i);
         var amt = parseFloat(String(sec["amount paid (₹)"] || "").replace(/[^0-9.]/g, ""));
@@ -142,6 +162,7 @@
       else if (v.kind === "unpaid") v.valid = v.week >= 0;
       else v.valid = true;
     });
+    S.lists = lists; S.picks = picks; S.vetoes = vetoes;
     S.films = films; S.bonuses = bonuses; S.spots = spots; S.payments = payments; S.violations = violations; S.ignored = ignored; S.spotUsed = used;
   }
 
@@ -198,7 +219,53 @@
   }
 
   /* ---------- render ---------- */
-  function render() { renderStatus(); renderScore(); renderWeeks(); renderPot(); renderExtras(); renderLog(); }
+  function render() { renderStatus(); renderScore(); renderWeeks(); renderPot(); renderExtras(); renderLog(); renderWatch(); }
+  function latest(arr, key) { return (arr || []).filter(function (x) { return x.player === key; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0] || null; }
+  function renderWatch() {
+    var box = $("watchBox"); clear(box);
+    PLAYERS.forEach(function (p) {
+      var opp = PLAYERS.filter(function (x) { return x.key !== p.key; })[0];
+      var card = el("article", { cls: "pcard " + p.cls }, [el("div", { cls: "pname", style: "font-size:24px", text: p.name.toUpperCase() })]);
+      // watchlist
+      var wl = latest(S.lists, p.key);
+      var head = el("div", { style: "display:flex;justify-content:space-between;align-items:baseline;gap:8px" }, [el("strong", { text: "Watchlist" })]);
+      card.appendChild(head);
+      if (!wl) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: S.loaded ? "Not added yet." : "Loading…" }));
+      else {
+        var done = wl.items.filter(function (it) { return watchedBy(p.key, it.title); }).length;
+        head.appendChild(el("span", { cls: "muted", style: "font-size:13px" }, [done + " of " + wl.items.length + " watched · ", el("a", { href: wl.url, target: "_blank", rel: "noopener", text: "edit" })]));
+        card.appendChild(el("div", { style: "font-size:14px" }, [el("strong", { text: "Week 3 director: " }), wl.director || "not declared yet"]));
+        var ql = el("div", { cls: "qlist" });
+        wl.items.forEach(function (it) {
+          var w = watchedBy(p.key, it.title);
+          ql.appendChild(el("label", null, [el("span", { "aria-hidden": "true", style: "width:18px;text-align:center;font-weight:700;color:" + (w ? "var(--ok)" : "#bbb"), text: w ? "✓" : "○" }), el("span", { style: w ? "color:var(--mute)" : null, text: it.title }), it.note ? el("span", { cls: "muted", style: "margin-left:auto;font-size:12px;text-align:right", text: it.note }) : null]));
+        });
+        card.appendChild(ql);
+      }
+      // picks for this player (made by opponent)
+      var pk = opp ? latest(S.picks, opp.key) : null;
+      var vetoAll = (S.vetoes || []).filter(function (v) { return v.player === p.key; }).sort(function (a, b) { return a.at.localeCompare(b.at); });
+      var allOppPicks = (S.picks || []).filter(function (x) { return opp && x.player === opp.key; }).reduce(function (a, x) { return a.concat(x.films); }, []);
+      var veto = vetoAll.filter(function (v) { return allOppPicks.some(function (t) { return norm(t) === norm(v.film); }); })[0] || null;
+      card.appendChild(el("strong", { style: "margin-top:4px", text: "Picked for " + p.name + " by " + (opp ? opp.name : "?") }));
+      if (!pk) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: "No picks yet." }));
+      else {
+        var pl = el("div", { cls: "qlist" });
+        pk.films.forEach(function (t) {
+          var vetoed = veto && norm(veto.film) === norm(t), w = watchedBy(p.key, t);
+          pl.appendChild(el("label", null, [el("span", { style: vetoed ? "text-decoration:line-through;color:var(--mute)" : null, text: t }), el("span", { cls: "pill " + (vetoed ? "bad" : w ? "ok" : "soon"), style: "margin-left:auto", text: vetoed ? "Vetoed" : w ? "Watched" : "To watch" })]));
+        });
+        if (veto && !pk.films.some(function (t) { return norm(t) === norm(veto.film); })) {
+          pl.appendChild(el("label", null, [el("span", { style: "text-decoration:line-through;color:var(--mute)", text: veto.film }), el("span", { cls: "pill bad", style: "margin-left:auto", text: "Vetoed · replaced" })]));
+        }
+        card.appendChild(pl);
+        if (veto && pk.films.some(function (t) { return norm(t) === norm(veto.film); })) card.appendChild(el("p", { style: "margin:0;font-size:13px;color:var(--red-d)", text: (opp ? opp.name : "Their opponent") + " needs to send a replacement pick." }));
+        if (pk.note) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:13px", text: "“" + pk.note + "”" }));
+      }
+      card.appendChild(el("div", { style: "font-size:14px" }, [el("strong", { text: "Veto: " }), veto ? "used on " + veto.film : "not used yet"]));
+      box.appendChild(card);
+    });
+  }
   function renderPot() {
     var t = $("potTbl"); clear(t);
     var c = {}; PLAYERS.forEach(function (p) { c[p.key] = calc(p.key); });
