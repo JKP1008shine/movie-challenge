@@ -5,6 +5,6 @@ window.CHALLENGE = {
   repo: "JKP1008shine/movie-challenge",
   players: [
     { key: "sinjini", name: "Sinjini", github: "JKP1008shine" },
-    { key: "sankalp", name: "Sankalp", github: "his-username-here" }
+    { key: "sankalp", name: "Sankalp", github: "sankalpd000" }
   ]
 };
