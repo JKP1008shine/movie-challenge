@@ -148,6 +148,10 @@
   /* ---------- scoring ---------- */
   function filmValue(f) { return (f.failed || f.copied) ? 0 : ((f.rewatch || f.short) ? 0.5 : 1); }
   function filmPoints(f) { if (f.copied) return -3; if (f.failed) return -2; var y = f.year; return filmValue(f) + ((y && y < 1980) ? 1 : 0) + (f.assigned ? 1 : 0) + (f.review ? 2 : 0); }
+  function dayDiff(a, b) { return Math.round((new Date(b + "T12:00:00Z") - new Date(a + "T12:00:00Z")) / 86400000); }
+  function daysLeftText(i) { var n = dayDiff(todayStr(), WEEKS[i].end) + 1; return n <= 1 ? "last day" : n + " days left"; }
+  function liveDot() { return el("span", { cls: "live-dot", "aria-hidden": "true" }); }
+  function payWindow(i) { var t = todayStr(), W = WEEKS[i]; return t > W.end && t <= addDays(W.end, 2); }
   function addDays(d, n) { var x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
   function weekIndex(d) { for (var i = 0; i < WEEKS.length; i++) if (d >= WEEKS[i].start && d <= WEEKS[i].end) return i; return -1; }
   function calc(key) {
@@ -212,7 +216,8 @@
         });
         return el("td", null, kids);
       });
-      t.appendChild(el("tr", null, [el("td", null, [el("strong", { text: "Week " + (i + 1) })]), el("td", { text: fmtDate(addDays(W.end, 2)) + ", 11:59 pm" })].concat(cells)));
+      var due = payWindow(i);
+      t.appendChild(el("tr", { cls: due ? "wk-now" : null }, [el("td", null, [el("strong", null, [due ? liveDot() : null, "Week " + (i + 1)]), due ? el("div", { cls: "muted", style: "font-size:12px", text: "Payment due now" }) : null]), el("td", { text: fmtDate(addDays(W.end, 2)) + ", 11:59 pm" })].concat(cells)));
     });
     t.appendChild(el("tr", null, [el("td", null, [el("strong", { text: "Total" })]), el("td", { text: "" })].concat(PLAYERS.map(function (p) {
       var r = c[p.key];
@@ -241,7 +246,14 @@
     if (setup) s.appendChild(el("div", { cls: "note", text: "Setup: put both GitHub usernames in config.js, or a player's entries won't count." }));
     if (S.error) s.appendChild(el("div", { cls: "note err", text: S.error }));
     if (S.ignored) s.appendChild(el("div", { cls: "note", text: S.ignored + " entr" + (S.ignored === 1 ? "y" : "ies") + " from other GitHub accounts ignored." }));
-    $("updated").textContent = S.updated ? ("Updated " + S.updated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + ". New entries show up when you refresh.") : (S.loaded ? "" : "Loading…");
+    var t = todayStr(), now = "", ci = weekIndex(t);
+    if (t < WEEKS[0].start) { var d = dayDiff(t, WEEKS[0].start); now = "Starts Tue 1 Dec, " + (d === 1 ? "tomorrow" : "in " + d + " days") + " · Week 1: " + WEEKS[0].theme; }
+    else if (ci >= 0) now = "Week " + (ci + 1) + " of " + WEEKS.length + " · " + WEEKS[ci].theme + " · " + daysLeftText(ci);
+    else now = "Challenge over · final scores";
+    var upd = S.updated ? "Updated " + S.updated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : (S.loaded ? "" : "Loading…");
+    var u = $("updated"); clear(u);
+    u.appendChild(el("strong", { style: "color:var(--ink)" }, [ci >= 0 ? liveDot() : null, now]));
+    if (upd) u.appendChild(document.createTextNode(" · " + upd));
   }
   function renderScore() {
     var box = $("score"); clear(box);
@@ -274,11 +286,16 @@
     WEEKS.forEach(function (W, i) {
       var cells = PLAYERS.map(function (p) {
         var w = c[p.key].weeks[i], l = L[w.status];
-        var kids = [el("div", { text: num(w.count) + " film" + (w.count === 1 ? "" : "s") }), el("span", { cls: "pill " + l[1], text: l[0] + (w.status === "bad" ? " · " + rupees(w.fine) : "") })];
+        var kids;
+        if (w.status === "wip") {
+          var togo = Math.max(0, W.min - w.count);
+          kids = [el("div", { text: num(w.count) + " of " + W.min }), el("span", { cls: "pill " + (togo ? "wip" : "ok"), text: togo ? num(togo) + " to go · " + daysLeftText(i) : "Minimum met" })];
+        } else kids = [el("div", { text: num(w.count) + " film" + (w.count === 1 ? "" : "s") }), el("span", { cls: "pill " + l[1], text: l[0] + (w.status === "bad" ? " · " + rupees(w.fine) : "") })];
         if (w.done) kids.push(el("div", { style: "font-size:12px;color:var(--ok);margin-top:3px", text: "Theme done +2" }));
         return el("td", null, kids);
       });
-      t.appendChild(el("tr", null, [el("td", null, [el("strong", { text: "Week " + (i + 1) }), el("div", { cls: "muted", style: "font-size:12px", text: fmtDate(W.start) + " – " + fmtDate(W.end) })]), el("td", { text: W.theme }), el("td", { text: String(W.min) })].concat(cells)));
+      var td = todayStr(), isNow = td >= W.start && td <= W.end, isPast = td > W.end;
+      t.appendChild(el("tr", { cls: isNow ? "wk-now" : (isPast ? "wk-past" : null) }, [el("td", null, [el("strong", null, [isNow ? liveDot() : null, "Week " + (i + 1)]), el("div", { cls: "muted", style: "font-size:12px", text: isNow ? "This week · " + fmtDate(W.start) + " – " + fmtDate(W.end) : fmtDate(W.start) + " – " + fmtDate(W.end) })]), el("td", { text: W.theme }), el("td", { text: String(W.min) })].concat(cells)));
     });
   }
   function renderExtras() {
