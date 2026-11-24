@@ -220,6 +220,33 @@
 
   /* ---------- render ---------- */
   function render() { renderStatus(); renderScore(); renderWeeks(); renderPot(); renderExtras(); renderLog(); renderWatch(); }
+  function readiness(wl, picksFor) {
+    var issues = [], good = [];
+    var items = wl ? wl.items : [];
+    var seen = {}; var all = [];
+    items.concat((picksFor || []).map(function (t) { return { title: t, note: "", pick: true }; })).forEach(function (it) { var n = norm(it.title); if (n && !seen[n]) { seen[n] = true; all.push(it); } });
+    var total = all.length;
+    if (total < 25) issues.push("Only " + total + " films planned. Add " + (25 - total) + " more to reach 25.");
+    else if (total < 30) issues.push(total + " films planned: enough for 25, but add " + (30 - total) + " spare" + (30 - total === 1 ? "" : "s") + " in case a film isn't available.");
+    else good.push(total + " films planned, with spares");
+    var weekOf = function (it) { var m = String(it.note || "").match(/week\s*(\d)/i); return m ? parseInt(m[1], 10) - 1 : -1; };
+    var yearOf = function (it) { var m = (String(it.title) + " " + String(it.note || "")).match(/\b(19\d{2}|20\d{2})\b/); return m ? parseInt(m[1], 10) : null; };
+    var NEED = [2, 2, 3, 5, 2];
+    var byWeek = WEEKS.map(function (_, i) { return items.filter(function (it) { return weekOf(it) === i; }); });
+    var untagged = items.filter(function (it) { return weekOf(it) < 0; }).length;
+    byWeek.forEach(function (list, i) {
+      if (list.length < NEED[i]) issues.push("Week " + (i + 1) + " (" + WEEKS[i].theme + "): " + list.length + " of " + NEED[i] + " tagged.");
+    });
+    if (!wl || !wl.director) issues.push("Week 3 director not declared.");
+    var decades = [1960, 1970, 1980, 1990, 2000];
+    var w4 = byWeek[3].map(yearOf).filter(Boolean);
+    var missingDec = decades.filter(function (d) { return !w4.some(function (y) { return y >= d && y < d + 10; }); });
+    if (byWeek[3].length && missingDec.length) issues.push("Week 4 decades missing (add years in brackets): " + missingDec.map(function (d) { return "'" + String(d).slice(2) + "s"; }).join(", ") + ".");
+    var w5 = byWeek[4], not26 = w5.filter(function (it) { var y = yearOf(it); return y && y !== 2026; });
+    if (not26.length) issues.push("Week 5 should be 2026 releases: " + not26.map(function (it) { return it.title; }).join(", ") + ".");
+    if (!issues.length) { good.push("every theme covered"); if (untagged) good.push(untagged + " free pick" + (untagged === 1 ? "" : "s")); }
+    return { ok: !issues.length, issues: issues, good: good, untagged: untagged };
+  }
   function latest(arr, key) { return (arr || []).filter(function (x) { return x.player === key; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0] || null; }
   function renderWatch() {
     var box = $("watchBox"); clear(box);
@@ -247,6 +274,17 @@
       var vetoAll = (S.vetoes || []).filter(function (v) { return v.player === p.key; }).sort(function (a, b) { return a.at.localeCompare(b.at); });
       var allOppPicks = (S.picks || []).filter(function (x) { return opp && x.player === opp.key; }).reduce(function (a, x) { return a.concat(x.films); }, []);
       var veto = vetoAll.filter(function (v) { return allOppPicks.some(function (t) { return norm(t) === norm(v.film); }); })[0] || null;
+      if (wl) {
+        var vetoT = veto ? norm(veto.film) : null;
+        var rd = readiness(wl, pk ? pk.films.filter(function (t) { return norm(t) !== vetoT; }) : []);
+        var rbox = el("div", { style: "border-radius:10px;padding:10px 12px;font-size:14px;background:" + (rd.ok ? "var(--okbg)" : "var(--warnbg)") + ";color:" + (rd.ok ? "var(--ok)" : "#4A3500") }, [
+          el("strong", { text: rd.ok ? "✓ Ready for 1 December" : "Not ready yet" }),
+          rd.good.length ? el("div", { style: "font-size:13px", text: rd.good.join(" · ") }) : null
+        ]);
+        if (rd.issues.length) rbox.appendChild(el("ul", { style: "margin:4px 0 0;padding-left:18px" }, rd.issues.map(function (x) { return el("li", { text: x }); })));
+        if (rd.untagged && !rd.ok) rbox.appendChild(el("div", { style: "font-size:12px;margin-top:4px;opacity:.85", text: rd.untagged + " film" + (rd.untagged === 1 ? " has" : "s have") + " no week tag. Add “- Week N” after a title to count it towards a theme." }));
+        card.insertBefore(rbox, card.children[1]);
+      }
       card.appendChild(el("strong", { style: "margin-top:4px", text: "Picked for " + p.name + " by " + (opp ? opp.name : "?") }));
       if (!pk) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: "No picks yet." }));
       else {
