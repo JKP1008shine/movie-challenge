@@ -1,0 +1,30 @@
+name: Lock watchlists
+
+on:
+  schedule:
+    - cron: "30 18 30 11 *"   # Tue 1 Dec 2026, 12:00 am IST
+    - cron: "0 * 1 12 *"      # backup: every hour on 1 Dec, in case the first run is late
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Save the watchlists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/lock_watchlists.py
+      - name: Commit the locked copy
+        run: |
+          if [ -n "$(git status --porcelain locked)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add locked
+            git commit -m "Lock watchlists for the challenge"
+            git push
+          fi
