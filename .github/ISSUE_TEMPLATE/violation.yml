@@ -1,0 +1,37 @@
+name: "🚩 Raise a violation"
+description: Report your opponent for an unpaid fine or a copied post.
+title: "[Violation] "
+labels: ["violation"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What's the violation?
+      options:
+        - "Unpaid or late fine (doubles it if unpaid by Tuesday midnight)"
+        - "Copied Instagram post or review (film scores 0, -3)"
+        - "Other rule break (settle it in the chat)"
+    validations:
+      required: true
+  - type: dropdown
+    id: week
+    attributes:
+      label: Week (for unpaid fines)
+      options:
+        - "Week 1 (1-6 Dec)"
+        - "Week 2 (7-13 Dec)"
+        - "Week 3 (14-20 Dec)"
+        - "Week 4 (21-27 Dec)"
+        - "Week 5 (28-31 Dec)"
+  - type: input
+    id: film
+    attributes:
+      label: Film issue number (for copied posts)
+      placeholder: "12"
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Explain what happened. For a copied post, paste the link to the original.
+    validations:
+      required: true

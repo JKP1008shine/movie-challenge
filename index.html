@@ -129,6 +129,8 @@ details.ht p{margin:0 0 8px}
         <a class="btn" id="lnkFilm" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">+ Log a film</a>
         <a class="btn ghost" id="lnkBonus" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Claim a bonus</a>
         <a class="btn ghost" id="lnkSpot" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Report a spot-check</a>
+        <a class="btn ghost" id="lnkPay" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Pay the pot</a>
+        <a class="btn ghost" id="lnkViol" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Raise a violation</a>
         <button class="btn ghost" type="button" id="refresh">Refresh</button>
       </div>
     </div>
@@ -138,6 +140,12 @@ details.ht p{margin:0 0 8px}
 
     <h2>Weekly check</h2>
     <div class="card scroll"><table class="tbl" id="weekTbl"></table></div>
+
+    <h2>The pot</h2>
+    <p class="muted" style="margin-top:-4px" id="potSum"></p>
+    <div class="card scroll"><table class="tbl" id="potTbl"></table></div>
+    <h3>Violations</h3>
+    <div class="card" id="violList"></div>
 
     <h2>Bonuses and spot-checks</h2>
     <div class="extras" id="extras"></div>
@@ -157,7 +165,7 @@ details.ht p{margin:0 0 8px}
     <h2 id="t-howto" style="margin-top:0">How to</h2>
     <p>Everything you might need, step by step. Tap a question to open it.</p>
     <nav class="toc" aria-label="How-to sections">
-      <a href="#h-start">Getting started</a><a href="#h-log">Logging films</a><a href="#h-insta">Instagram posts</a><a href="#h-bonus">Bonuses &amp; power-ups</a><a href="#h-spot">Spot-checks</a><a href="#h-score">Reading the scores</a><a href="#h-money">Fines &amp; the pot</a><a href="#h-phone">On your phone</a><a href="#h-help">Troubleshooting</a>
+      <a href="#h-start">Getting started</a><a href="#h-log">Logging films</a><a href="#h-insta">Instagram posts</a><a href="#h-bonus">Bonuses &amp; power-ups</a><a href="#h-spot">Spot-checks</a><a href="#h-score">Reading the scores</a><a href="#h-money">Fines, the pot &amp; violations</a><a href="#h-phone">On your phone</a><a href="#h-help">Troubleshooting</a>
     </nav>
 
     <h3 id="h-start">Getting started</h3>
@@ -222,17 +230,22 @@ details.ht p{margin:0 0 8px}
 
     <h3 id="h-score">Reading the scores</h3>
     <details class="ht"><summary>What the scorecard numbers mean</summary>
-      <ul><li><strong>Films of 25:</strong> your film count. Rewatches and shorts add half.</li><li><strong>Final score:</strong> film points + bonuses − 3 for each missed week. Highest on 31 Dec wins.</li><li><strong>Film points:</strong> points from your films alone.</li><li><strong>Bonuses:</strong> theme weeks, side quests and Double or Nothing.</li><li><strong>Owes the pot:</strong> your total fines so far.</li><li><strong>LEADING:</strong> who's ahead on score (ties go to more films).</li></ul></details>
+      <ul><li><strong>Films of 25:</strong> your film count. Rewatches and shorts add half.</li><li><strong>Final score:</strong> film points + bonuses − 3 for each missed week. Highest on 31 Dec wins.</li><li><strong>Film points:</strong> points from your films alone.</li><li><strong>Bonuses:</strong> theme weeks, side quests and Double or Nothing.</li><li><strong>Still to pay:</strong> fines you haven't paid yet. The pot section shows each week.</li><li><strong>LEADING:</strong> who's ahead on score (ties go to more films).</li></ul></details>
     <details class="ht"><summary>What the weekly check means</summary>
       <ul><li><strong>Upcoming:</strong> the week hasn't started.</li><li><strong>In progress:</strong> the week is on; keep watching.</li><li><strong>Done:</strong> you met the minimum.</li><li><strong>Missed · ₹amount:</strong> you fell short; that's your fine for the week.</li><li><strong>Sick Day Pass:</strong> missed, but covered.</li><li><strong>Theme done +2:</strong> 2 or more theme films that week.</li></ul></details>
     <details class="ht"><summary>See only one player's films</summary>
       <p>Above the Film log, tap <strong>Sinjini</strong> or <strong>Sankalp</strong>. Tap <strong>Everyone</strong> to see both again.</p></details>
 
-    <h3 id="h-money">Fines &amp; the pot</h3>
+    <h3 id="h-money">Fines, the pot &amp; violations</h3>
     <details class="ht"><summary>How fines are worked out</summary>
       <p>Each week ends Sunday at midnight. For every film you're short of the minimum (5, or 3 in week 5), you owe ₹200. Half films count, so 4.5 of 5 costs ₹100. The site works it out on its own.</p></details>
-    <details class="ht"><summary>Pay into the pot</summary>
-      <ol><li>Check “Owes the pot” on your scorecard on Monday.</li><li>Pay that week's amount within 48 hours, the way you both agreed (for example UPI to whoever holds the pot).</li><li>Post the payment screenshot in the chat. Late payments double.</li></ol></details>
+    <details class="ht"><summary>Pay your fine</summary>
+      <ol><li>On Monday, check <strong>The pot</strong> on the Tracker: it shows each week's fine and the deadline, the <strong>Tuesday after the week, 11:59 pm</strong>.</li><li>Pay the amount by UPI to whoever holds the pot, and take a screenshot showing the amount, date and transaction ID.</li><li>Tap <strong>“Pay the pot”</strong>, pick the week, enter the amount, drag in your screenshot and submit.</li><li>Tap <strong>Refresh</strong>. Your week turns <strong>Paid</strong>, with a link to your screenshot.</li></ol></details>
+    <details class="ht"><summary>Raise a violation</summary>
+      <ol><li>Tap <strong>“Raise a violation”</strong> on the Tracker.</li><li>Pick the type:
+        <ul><li><strong>Unpaid or late fine:</strong> pick the week. If your opponent hasn't paid it by the Tuesday deadline, their fine for that week <strong>doubles</strong>.</li><li><strong>Copied Instagram post:</strong> enter their film's #number and paste the link to the original. The film scores 0 and they lose 3 points.</li><li><strong>Other rule break:</strong> describe it, then settle it in the chat.</li></ul></li>
+        <li>Add your evidence and submit. Violations show under <strong>The pot</strong> on the Tracker.</li></ol>
+      <p class="muted">Only violations against your opponent count. Raised by mistake? Close the issue.</p></details>
     <details class="ht"><summary>What happens on 31 December</summary>
       <ol><li>Final scores lock at 11:59 pm.</li><li>The lower score is the loser and faces the loser's fate (see the Rulebook).</li><li>If you both hit 25 films, nobody's punished and the pot pays for a movie night.</li></ol></details>
 
@@ -352,7 +365,7 @@ details.ht p{margin:0 0 8px}
     </ol>
 
     <h3 id="r-stakes">Stakes and punishments</h3>
-    <p><strong>The pot.</strong> Every film you are short of the weekly minimum costs ₹200, paid into a shared pot every Sunday night. Watch 3 of 5 and you pay ₹400 that week. Skip the whole month and you pay ₹4,600. A rewatch or short counts as half a film, so it saves ₹100. Pay within 48 hours, or that week's amount doubles. A missed week also costs 3 points.</p>
+    <p><strong>The pot.</strong> Every film you are short of the weekly minimum costs ₹200, paid into a shared pot every Sunday night. Watch 3 of 5 and you pay ₹400 that week. Skip the whole month and you pay ₹4,600. A rewatch or short counts as half a film, so it saves ₹100. Pay by the Tuesday after the week ends (11:59 pm), and record it with the “Pay the pot” form and your screenshot. If it's still unpaid after that, your opponent can raise a violation and that week's fine doubles. A missed week also costs 3 points.</p>
     <p><strong>The final loser</strong> (lower score on 31 Dec):</p>
     <ol>
       <li><strong>Pays for a theatre outing</strong> for both of you, popcorn and drinks included. The pot covers part of it first.</li>

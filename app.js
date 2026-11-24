@@ -53,6 +53,8 @@
   $("lnkFilm").href = base + "log-film.yml";
   $("lnkBonus").href = base + "bonus.yml";
   $("lnkSpot").href = base + "spot-check.yml";
+  $("lnkPay").href = base + "payment.yml";
+  $("lnkViol").href = base + "violation.yml";
   var acct = $("acct");
   acct.appendChild(el("a", { href: "https://github.com/" + REPO + "/issues", target: "_blank", rel: "noopener", style: "color:#fff", text: "All entries on GitHub ↗" }));
 
@@ -84,14 +86,15 @@
     return false;
   }
   function classify(issues) {
-    var films = [], bonuses = [], spots = [], ignored = 0;
+    var films = [], bonuses = [], spots = [], payments = [], violations = [], ignored = 0;
     issues.forEach(function (is) {
       if (is.pull_request) return;
       var player = playerOf(is.user && is.user.login);
       var sec = sections(is.body);
       var base = { num: is.number, url: is.html_url, player: player, at: is.created_at || "" };
-      var isFilm = "movie" in sec, isBonus = "what are you claiming?" in sec, isSpot = "film issue number" in sec;
-      if (!isFilm && !isBonus && !isSpot) return;
+      var isFilm = "movie" in sec, isBonus = "what are you claiming?" in sec, isPay = "amount paid (₹)" in sec, isViol = "what's the violation?" in sec;
+      var isSpot = !isViol && "film issue number" in sec;
+      if (!isFilm && !isBonus && !isSpot && !isPay && !isViol) return;
       if (!player) { ignored++; return; }
       if (isFilm) {
         var flags = sec["extras"] || "";
@@ -108,6 +111,15 @@
       } else if (isBonus) {
         var wk = String(sec["which week? (needed for sick day pass)"] || "").match(/Week\s*(\d)/i);
         bonuses.push(Object.assign(base, { kind: String(sec["what are you claiming?"] || ""), week: wk ? parseInt(wk[1], 10) - 1 : -1 }));
+      } else if (isPay) {
+        var pw = String(sec["week you're paying for"] || "").match(/Week\s*(\d)/i);
+        var amt = parseFloat(String(sec["amount paid (₹)"] || "").replace(/[^0-9.]/g, ""));
+        payments.push(Object.assign(base, { week: pw ? parseInt(pw[1], 10) - 1 : -1, amount: isNaN(amt) ? 0 : amt, shots: proofParts(sec["payment screenshot"] || "").urls, txn: String(sec["transaction id"] || "").slice(0, 60) }));
+      } else if (isViol) {
+        var vk = String(sec["what's the violation?"] || "").toLowerCase();
+        var vw = String(sec["week (for unpaid fines)"] || "").match(/Week\s*(\d)/i);
+        var vf = parseInt(String(sec["film issue number (for copied posts)"] || "").replace(/[^0-9]/g, ""), 10);
+        violations.push(Object.assign(base, { kind: vk.indexOf("unpaid") === 0 ? "unpaid" : (vk.indexOf("copied") === 0 ? "copied" : "other"), week: vw ? parseInt(vw[1], 10) - 1 : -1, film: isNaN(vf) ? null : vf, evidence: String(sec["evidence"] || "") }));
       } else {
         var fn = parseInt(String(sec["film issue number"] || "").replace(/[^0-9]/g, ""), 10);
         spots.push(Object.assign(base, { film: fn, failed: /^failed/i.test(sec["result"] || "") }));
@@ -123,12 +135,20 @@
       if (s.valid) { used[s.player] = (used[s.player] || 0) + 1; if (s.failed) failedNums[s.film] = true; }
     });
     films.forEach(function (f) { f.failed = !!failedNums[f.num]; });
-    S.films = films; S.bonuses = bonuses; S.spots = spots; S.ignored = ignored; S.spotUsed = used;
+    // violations: filed against the other player
+    violations.forEach(function (v) {
+      v.against = PLAYERS.filter(function (p) { return p.key !== v.player; }).map(function (p) { return p.key; })[0] || null;
+      if (v.kind === "copied") { var f = filmByNum[v.film]; v.valid = !!(f && f.player !== v.player); if (v.valid) f.copied = true; }
+      else if (v.kind === "unpaid") v.valid = v.week >= 0;
+      else v.valid = true;
+    });
+    S.films = films; S.bonuses = bonuses; S.spots = spots; S.payments = payments; S.violations = violations; S.ignored = ignored; S.spotUsed = used;
   }
 
   /* ---------- scoring ---------- */
-  function filmValue(f) { return f.failed ? 0 : ((f.rewatch || f.short) ? 0.5 : 1); }
-  function filmPoints(f) { if (f.failed) return -2; var y = f.year; return filmValue(f) + ((y && y < 1980) ? 1 : 0) + (f.assigned ? 1 : 0) + (f.review ? 2 : 0); }
+  function filmValue(f) { return (f.failed || f.copied) ? 0 : ((f.rewatch || f.short) ? 0.5 : 1); }
+  function filmPoints(f) { if (f.copied) return -3; if (f.failed) return -2; var y = f.year; return filmValue(f) + ((y && y < 1980) ? 1 : 0) + (f.assigned ? 1 : 0) + (f.review ? 2 : 0); }
+  function addDays(d, n) { var x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
   function weekIndex(d) { for (var i = 0; i < WEEKS.length; i++) if (d >= WEEKS[i].start && d <= WEEKS[i].end) return i; return -1; }
   function calc(key) {
     var today = todayStr();
@@ -151,14 +171,70 @@
       else if (today <= W.end) w.status = "wip";
       else if (w.count >= W.min) w.status = "ok";
       else if (sick === i) w.status = "sick";
-      else { w.status = "bad"; missed++; w.fine = (W.min - w.count) * 200; owes += w.fine; }
+      else { w.status = "bad"; missed++; w.fine = (W.min - w.count) * 200; }
+      // money for this week
+      w.fine = w.fine || 0;
+      var deadline = new Date(addDays(W.end, 2) + "T23:59:59+05:30");
+      w.deadline = addDays(W.end, 2);
+      var pays = (S.payments || []).filter(function (x) { return x.player === key && x.week === i; });
+      w.pays = pays;
+      w.paid = pays.reduce(function (t, x) { return t + x.amount; }, 0);
+      var onTime = pays.filter(function (x) { return new Date(x.at) <= deadline; }).reduce(function (t, x) { return t + x.amount; }, 0);
+      var reported = (S.violations || []).some(function (v) { return v.valid && v.kind === "unpaid" && v.against === key && v.week === i; });
+      var late = new Date() > deadline && onTime < w.fine;
+      w.doubled = w.fine > 0 && late && reported;
+      w.due = w.doubled ? w.fine * 2 : w.fine;
+      w.pay = w.due <= 0 ? "none" : (w.paid >= w.due ? "paid" : (new Date() <= deadline ? "due" : (w.doubled ? "doubled" : "overdue")));
+      owes += w.due;
     });
+    var paidTotal = weeks.reduce(function (t, w) { return t + w.paid; }, 0);
+    var outstanding = weeks.reduce(function (t, w) { return t + Math.max(0, w.due - w.paid); }, 0);
     var extra = don || 0;
-    return { films: films, pts: pts, themeBonus: themeBonus, qpts: qpts, extra: extra, don: don, missed: missed, owes: owes, total: pts + themeBonus + qpts + extra - 3 * missed, weeks: weeks, count: fs.length, sick: sick, quests: quests, spot: (S.spotUsed && S.spotUsed[key]) || 0 };
+    return { films: films, pts: pts, themeBonus: themeBonus, qpts: qpts, extra: extra, don: don, missed: missed, owes: owes, paid: paidTotal, outstanding: outstanding, total: pts + themeBonus + qpts + extra - 3 * missed, weeks: weeks, count: fs.length, sick: sick, quests: quests, spot: (S.spotUsed && S.spotUsed[key]) || 0 };
   }
 
   /* ---------- render ---------- */
-  function render() { renderStatus(); renderScore(); renderWeeks(); renderExtras(); renderLog(); }
+  function render() { renderStatus(); renderScore(); renderWeeks(); renderPot(); renderExtras(); renderLog(); }
+  function renderPot() {
+    var t = $("potTbl"); clear(t);
+    var c = {}; PLAYERS.forEach(function (p) { c[p.key] = calc(p.key); });
+    t.appendChild(el("tr", null, [el("th", { text: "Week" }), el("th", { text: "Pay by" })].concat(PLAYERS.map(function (p) { return el("th", { text: p.name }); }))));
+    var L = { paid: ["Paid", "ok"], due: ["Due", "wip"], overdue: ["Overdue", "bad"], doubled: ["Late · doubled", "bad"] };
+    WEEKS.forEach(function (W, i) {
+      var cells = PLAYERS.map(function (p) {
+        var w = c[p.key].weeks[i];
+        if (w.pay === "none") return el("td", { cls: "muted", text: w.status === "soon" || w.status === "wip" ? "–" : "No fine" });
+        var kids = [el("div", { text: "Fine " + rupees(w.due) + (w.doubled ? " (doubled)" : "") }), el("span", { cls: "pill " + L[w.pay][1], text: L[w.pay][0] })];
+        w.pays.forEach(function (x) {
+          var row = el("div", { style: "font-size:12px;margin-top:3px" }, ["Paid " + rupees(x.amount) + " · ", el("a", { href: x.url, target: "_blank", rel: "noopener", text: "#" + x.num })]);
+          x.shots.slice(0, 2).forEach(function (u, k) { row.appendChild(document.createTextNode(" · ")); row.appendChild(el("a", { href: u, target: "_blank", rel: "noopener noreferrer", text: "screenshot" + (x.shots.length > 1 ? " " + (k + 1) : "") })); });
+          kids.push(row);
+        });
+        return el("td", null, kids);
+      });
+      t.appendChild(el("tr", null, [el("td", null, [el("strong", { text: "Week " + (i + 1) })]), el("td", { text: fmtDate(addDays(W.end, 2)) + ", 11:59 pm" })].concat(cells)));
+    });
+    t.appendChild(el("tr", null, [el("td", null, [el("strong", { text: "Total" })]), el("td", { text: "" })].concat(PLAYERS.map(function (p) {
+      var r = c[p.key];
+      return el("td", null, [el("div", { text: "Fines " + rupees(r.owes) }), el("div", { text: "Paid " + rupees(r.paid) }), el("strong", { style: "color:" + (r.outstanding ? "var(--red)" : "var(--ok)"), text: "Still to pay " + rupees(r.outstanding) })]);
+    }))));
+    var collected = PLAYERS.reduce(function (s2, p) { return s2 + c[p.key].paid; }, 0);
+    $("potSum").textContent = "Pot collected so far: " + rupees(collected) + ".";
+    var vl = $("violList"); clear(vl);
+    var vs = (S.violations || []).slice().sort(function (a, b) { return b.at.localeCompare(a.at); });
+    if (!vs.length) { vl.appendChild(el("p", { cls: "muted", style: "margin:0", text: "No violations raised." })); return; }
+    vs.forEach(function (v) {
+      var by = pinfo(v.player), ag = pinfo(v.against);
+      var what = v.kind === "unpaid" ? ("Unpaid fine, week " + (v.week + 1)) : v.kind === "copied" ? ("Copied post on film #" + (v.film || "?")) : "Other rule break";
+      var effect = !v.valid ? "Not counted (check the week or film number)" : v.kind === "copied" ? "Film scores 0, −3" : v.kind === "unpaid" ? "Fine doubles if not paid by the deadline" : "Settle it in the chat";
+      vl.appendChild(el("div", { style: "display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px" }, [
+        el("span", { cls: "pill bad", text: "Violation" }),
+        el("strong", { text: what }),
+        el("span", { cls: "muted", text: (by ? by.name : "?") + " against " + (ag ? ag.name : "?") + " · " + effect }),
+        el("a", { href: v.url, target: "_blank", rel: "noopener", text: "#" + v.num })
+      ]));
+    });
+  }
   function renderStatus() {
     var s = $("status"); clear(s);
     var setup = PLAYERS.some(function (p) { return !p.github || p.github.indexOf("_username") >= 0 || p.github.indexOf("github_username") >= 0; });
@@ -183,12 +259,12 @@
           el("div", { cls: "stat" }, [el("b", { text: num(r.total) }), el("span", { text: "final score" })]),
           el("div", { cls: "stat" }, [el("b", { text: num(r.pts) }), el("span", { text: "film points" })]),
           el("div", { cls: "stat" }, [el("b", { text: (r.themeBonus + r.qpts + r.extra >= 0 ? "+" : "") + num(r.themeBonus + r.qpts + r.extra) }), el("span", { text: "bonuses" })]),
-          el("div", { cls: "stat owes" }, [el("b", { text: rupees(r.owes) }), el("span", { text: r.missed ? ("owes · " + r.missed + " missed wk") : "owes the pot" })])
+          el("div", { cls: "stat owes" }, [el("b", { text: rupees(r.outstanding) }), el("span", { text: "still to pay" + (r.missed ? " · " + r.missed + " missed wk" : "") })])
         ])
       ]));
     });
-    var pot = PLAYERS.reduce(function (s, p) { return s + c[p.key].owes; }, 0);
-    box.appendChild(el("p", { cls: "muted", style: "grid-column:1/-1;margin:0;font-size:14px", text: "Pot so far: " + rupees(pot) + ". Fines are ₹200 per film short of each week's minimum, counted when the week ends." }));
+    var collected = PLAYERS.reduce(function (s, p) { return s + c[p.key].paid; }, 0);
+    box.appendChild(el("p", { cls: "muted", style: "grid-column:1/-1;margin:0;font-size:14px", text: "Pot collected: " + rupees(collected) + ". Fines are ₹200 per film short of each week's minimum, payable by the Tuesday after." }));
   }
   function renderWeeks() {
     var t = $("weekTbl"); clear(t);
@@ -232,7 +308,8 @@
       var tags = el("div", { cls: "tags" });
       [["rewatch", "Rewatch"], ["short", "Short"], ["assigned", "Assigned"], ["review", "Reel +2"], ["theme", "Theme"]].forEach(function (x) { if (f[x[0]]) tags.appendChild(el("span", { cls: "tag", text: x[1] })); });
       if (f.year && f.year < 1980) tags.appendChild(el("span", { cls: "tag", text: "Pre-1980" }));
-      if (f.failed) tags.appendChild(el("span", { cls: "pill bad", text: "Failed spot-check" }));
+      if (f.copied) tags.appendChild(el("span", { cls: "pill bad", text: "Copied post" }));
+      else if (f.failed) tags.appendChild(el("span", { cls: "pill bad", text: "Failed spot-check" }));
       var pp = proofParts(f.note), noteTxt = pp.text;
       var ig = /^https:\/\/(www\.)?instagram\.com\//i.test(f.insta) ? f.insta : (/^(www\.)?instagram\.com\//i.test(f.insta) ? "https://" + f.insta : "");
       var linkKids = [];

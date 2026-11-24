@@ -1,0 +1,35 @@
+name: "💰 Pay the pot"
+description: Record a fine you've paid into the pot, with your payment screenshot.
+title: "[Payment] "
+labels: ["payment"]
+body:
+  - type: dropdown
+    id: week
+    attributes:
+      label: Week you're paying for
+      options:
+        - "Week 1 (1-6 Dec)"
+        - "Week 2 (7-13 Dec)"
+        - "Week 3 (14-20 Dec)"
+        - "Week 4 (21-27 Dec)"
+        - "Week 5 (28-31 Dec)"
+    validations:
+      required: true
+  - type: input
+    id: amount
+    attributes:
+      label: Amount paid (₹)
+      placeholder: "400"
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Payment screenshot
+      description: Drag your UPI or bank screenshot into this box. It must show the amount, date and transaction ID.
+    validations:
+      required: true
+  - type: input
+    id: txn
+    attributes:
+      label: Transaction ID
