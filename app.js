@@ -19,6 +19,8 @@
     { id: "together", match: "debated together", label: "Watched + debated together", pts: 2 },
     { id: "convert", match: "converted a friend", label: "Converted a friend", pts: 2 }
   ];
+  var LOCK = new Date("2026-12-01T00:00:00+05:30");
+  function isLocked() { return new Date() >= LOCK; }
   var S = { films: [], bonuses: [], spots: [], ignored: 0, filter: "all", loaded: false, error: "", updated: null };
 
   function $(id) { return document.getElementById(id); }
@@ -56,6 +58,7 @@
   $("lnkPay").href = base + "payment.yml";
   $("lnkViol").href = base + "violation.yml";
   $("lnkList").href = base + "watchlist.yml";
+  if (isLocked()) { var lb = $("lnkList"); lb.removeAttribute("href"); lb.setAttribute("aria-disabled", "true"); lb.style.opacity = ".45"; lb.style.pointerEvents = "none"; lb.textContent = "Watchlists locked"; }
   $("lnkPicks").href = base + "assign.yml";
   $("lnkVeto").href = base + "veto.yml";
   var acct = $("acct");
@@ -90,6 +93,27 @@
       var m = l.split(/\s+[-–—]\s+/);
       return { title: m[0].slice(0, 120), note: m.slice(1).join(" - ").slice(0, 120) };
     }).filter(Boolean).slice(0, 80);
+  }
+  function weekTag(it) { var m = String(it.note || "").match(/week\s*(\d)/i); return m ? parseInt(m[1], 10) - 1 : -1; }
+  // The watchlist that counts: the locked copy from 1 Dec onwards, the latest draft before that.
+  function effList(key) {
+    var p = pinfo(key); if (!p) return null;
+    if (!isLocked()) { var d = latest(S.lists, key); return d ? Object.assign({ state: "draft" }, d) : null; }
+    if (S.locked) {
+      var e = S.locked.lists && S.locked.lists[p.github];
+      if (!e) return { state: "locked", director: "", items: [], url: null, none: true };
+      var sec = sections(e.body);
+      return { state: "locked", director: String(sec["week 3 director"] || "").slice(0, 80), items: parseList(sec["my watchlist"]), url: "https://github.com/" + REPO + "/blob/main/locked/watchlists.json", num: e.number };
+    }
+    var before = (S.lists || []).filter(function (x) { return x.player === key && new Date(x.at) < LOCK; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0];
+    return before ? Object.assign({ state: "locking" }, before) : { state: "locking", director: "", items: [], url: null, none: true };
+  }
+  function themeFit(f) {
+    if (f.failed || f.copied) return false;
+    var wi = weekIndex(f.date); if (wi < 0) return false;
+    var wl = effList(f.player); if (!wl) return false;
+    var n = norm(f.title);
+    return wl.items.some(function (it) { return weekTag(it) === wi && norm(it.title) === n; });
   }
   function norm(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\(\s*\d{4}\s*\)/g, "").replace(/[^a-z0-9]+/g, " ").replace(/^\s*the\s+/, "").trim(); }
   function watchedBy(key, title) { var n = norm(title); return !!n && S.films.some(function (f) { return f.player === key && !f.copied && norm(f.title) === n; }); }
@@ -188,7 +212,7 @@
     });
     var films = 0, pts = 0;
     var weeks = WEEKS.map(function () { return { count: 0, theme: 0 }; });
-    fs.forEach(function (f) { films += filmValue(f); pts += filmPoints(f); var wi = weekIndex(f.date); if (wi >= 0) { weeks[wi].count += filmValue(f); if (f.theme && !f.failed) weeks[wi].theme++; } });
+    fs.forEach(function (f) { films += filmValue(f); pts += filmPoints(f); var wi = weekIndex(f.date); if (wi >= 0) { weeks[wi].count += filmValue(f); if (themeFit(f)) weeks[wi].theme++; } });
     var missed = 0, owes = 0, themeBonus = 0;
     weeks.forEach(function (w, i) {
       var W = WEEKS[i]; w.done = w.theme >= 2; if (w.done) themeBonus += 2;
@@ -229,7 +253,7 @@
     if (total < 25) issues.push("Only " + total + " films planned. Add " + (25 - total) + " more to reach 25.");
     else if (total < 30) issues.push(total + " films planned: enough for 25, but add " + (30 - total) + " spare" + (30 - total === 1 ? "" : "s") + " in case a film isn't available.");
     else good.push(total + " films planned, with spares");
-    var weekOf = function (it) { var m = String(it.note || "").match(/week\s*(\d)/i); return m ? parseInt(m[1], 10) - 1 : -1; };
+    var weekOf = weekTag;
     var yearOf = function (it) { var m = (String(it.title) + " " + String(it.note || "")).match(/\b(19\d{2}|20\d{2})\b/); return m ? parseInt(m[1], 10) : null; };
     var NEED = [2, 2, 3, 5, 2];
     var byWeek = WEEKS.map(function (_, i) { return items.filter(function (it) { return weekOf(it) === i; }); });
@@ -254,13 +278,16 @@
       var opp = PLAYERS.filter(function (x) { return x.key !== p.key; })[0];
       var card = el("article", { cls: "pcard " + p.cls }, [el("div", { cls: "pname", style: "font-size:24px", text: p.name.toUpperCase() })]);
       // watchlist
-      var wl = latest(S.lists, p.key);
+      var wl = effList(p.key);
+      var lockTxt = wl && wl.state === "locked" ? "🔒 Locked on 1 Dec" : (isLocked() ? "🔒 Locking…" : "Draft · locks Tue 1 Dec, 12:00 am");
+      card.appendChild(el("span", { cls: "pill " + (isLocked() ? "soon" : "wip"), style: "align-self:flex-start", text: lockTxt }));
+      if (wl && wl.none) wl = null;
       var head = el("div", { style: "display:flex;justify-content:space-between;align-items:baseline;gap:8px" }, [el("strong", { text: "Watchlist" })]);
       card.appendChild(head);
-      if (!wl) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: S.loaded ? "Not added yet." : "Loading…" }));
+      if (!wl) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: !S.loaded ? "Loading…" : (isLocked() ? "No watchlist was shared before the lock, so no films count towards themes." : "Not added yet.") }));
       else {
         var done = wl.items.filter(function (it) { return watchedBy(p.key, it.title); }).length;
-        head.appendChild(el("span", { cls: "muted", style: "font-size:13px" }, [done + " of " + wl.items.length + " watched · ", el("a", { href: wl.url, target: "_blank", rel: "noopener", text: "edit" })]));
+        head.appendChild(el("span", { cls: "muted", style: "font-size:13px" }, [done + " of " + wl.items.length + " watched", wl.url ? " · " : null, wl.url ? el("a", { href: wl.url, target: "_blank", rel: "noopener", text: wl.state === "draft" ? "edit" : (wl.state === "locked" ? "locked copy" : "list") }) : null]));
         card.appendChild(el("div", { style: "font-size:14px" }, [el("strong", { text: "Week 3 director: " }), wl.director || "not declared yet"]));
         var ql = el("div", { cls: "qlist" });
         wl.items.forEach(function (it) {
@@ -274,7 +301,7 @@
       var vetoAll = (S.vetoes || []).filter(function (v) { return v.player === p.key; }).sort(function (a, b) { return a.at.localeCompare(b.at); });
       var allOppPicks = (S.picks || []).filter(function (x) { return opp && x.player === opp.key; }).reduce(function (a, x) { return a.concat(x.films); }, []);
       var veto = vetoAll.filter(function (v) { return allOppPicks.some(function (t) { return norm(t) === norm(v.film); }); })[0] || null;
-      if (wl) {
+      if (wl && !isLocked()) {
         var vetoT = veto ? norm(veto.film) : null;
         var rd = readiness(wl, pk ? pk.films.filter(function (t) { return norm(t) !== vetoT; }) : []);
         var rbox = el("div", { style: "border-radius:10px;padding:10px 12px;font-size:14px;background:" + (rd.ok ? "var(--okbg)" : "var(--warnbg)") + ";color:" + (rd.ok ? "var(--ok)" : "#4A3500") }, [
@@ -283,7 +310,7 @@
         ]);
         if (rd.issues.length) rbox.appendChild(el("ul", { style: "margin:4px 0 0;padding-left:18px" }, rd.issues.map(function (x) { return el("li", { text: x }); })));
         if (rd.untagged && !rd.ok) rbox.appendChild(el("div", { style: "font-size:12px;margin-top:4px;opacity:.85", text: rd.untagged + " film" + (rd.untagged === 1 ? " has" : "s have") + " no week tag. Add “- Week N” after a title to count it towards a theme." }));
-        card.insertBefore(rbox, card.children[1]);
+        card.insertBefore(rbox, card.children[2]);
       }
       card.appendChild(el("strong", { style: "margin-top:4px", text: "Picked for " + p.name + " by " + (opp ? opp.name : "?") }));
       if (!pk) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: "No picks yet." }));
@@ -428,7 +455,8 @@
     rows.forEach(function (f) {
       var p = pinfo(f.player) || { name: "?", cls: "" };
       var tags = el("div", { cls: "tags" });
-      [["rewatch", "Rewatch"], ["short", "Short"], ["assigned", "Assigned"], ["review", "Reel +2"], ["theme", "Theme"]].forEach(function (x) { if (f[x[0]]) tags.appendChild(el("span", { cls: "tag", text: x[1] })); });
+      [["rewatch", "Rewatch"], ["short", "Short"], ["assigned", "Assigned"], ["review", "Reel +2"]].forEach(function (x) { if (f[x[0]]) tags.appendChild(el("span", { cls: "tag", text: x[1] })); });
+      if (themeFit(f)) tags.appendChild(el("span", { cls: "tag", style: "color:var(--ok);border-color:var(--ok)", text: "Theme ✓" }));
       if (f.year && f.year < 1980) tags.appendChild(el("span", { cls: "tag", text: "Pre-1980" }));
       if (f.copied) tags.appendChild(el("span", { cls: "pill bad", text: "Copied post" }));
       else if (f.failed) tags.appendChild(el("span", { cls: "pill bad", text: "Failed spot-check" }));
@@ -465,7 +493,9 @@
         })
         .then(function (list) { all = all.concat(list); if (list.length === 100 && n < 5) return page(n + 1); });
     }
-    page(1).then(function () {
+    var lockedP = fetch("locked/watchlists.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    Promise.all([page(1), lockedP]).then(function (res) {
+      S.locked = res[1];
       classify(all); S.loaded = true; S.updated = new Date();
       try { localStorage.setItem(CACHE, JSON.stringify(all)); } catch (e) {}
     }).catch(function (e) {

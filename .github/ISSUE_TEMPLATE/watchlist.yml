@@ -1,5 +1,5 @@
 name: "📋 Update my watchlist"
-description: Your list of films for the challenge, and your Week 3 director.
+description: Your list of films for the challenge, and your Week 3 director. Draft it as often as you like; it locks at 12:00 am on Tue 1 Dec.
 title: "[Watchlist] "
 labels: ["watchlist"]
 body:
