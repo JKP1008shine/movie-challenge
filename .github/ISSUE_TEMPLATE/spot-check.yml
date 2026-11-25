@@ -6,9 +6,9 @@ body:
   - type: input
     id: film
     attributes:
-      label: Film issue number
-      description: The number of your opponent's film issue, like 12
-      placeholder: "12"
+      label: Film ID
+      description: The film's ID from the Film log on the site, like LB-574954935 or #12. You can also paste its Letterboxd link.
+      placeholder: "LB-574954935"
     validations:
       required: true
   - type: dropdown

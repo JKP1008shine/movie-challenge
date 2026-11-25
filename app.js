@@ -2,7 +2,7 @@
   "use strict";
   var CFG = window.CHALLENGE || {};
   var REPO = CFG.repo;
-  var PLAYERS = (CFG.players || []).map(function (p, i) { return { key: p.key, name: p.name, handle: String(p.github || ""), github: String(p.github || "").toLowerCase(), cls: i === 0 ? "p1" : "p2" }; });
+  var PLAYERS = (CFG.players || []).map(function (p, i) { return { key: p.key, name: p.name, handle: String(p.github || ""), github: String(p.github || "").toLowerCase(), lb: String(p.letterboxd || "").toLowerCase(), cls: i === 0 ? "p1" : "p2" }; });
   var WEEKS = [
     { start: "2026-12-01", end: "2026-12-06", min: 5, theme: "The Comeback" },
     { start: "2026-12-07", end: "2026-12-13", min: 5, theme: "World Tour" },
@@ -37,6 +37,7 @@
   function rupees(n) { return "₹" + Math.round(n).toLocaleString("en-IN"); }
   function num(n) { return (Math.round(n * 10) / 10).toString(); }
   function pinfo(k) { return PLAYERS.filter(function (p) { return p.key === k; })[0]; }
+  function playerOfLb(u) { u = String(u || "").toLowerCase(); var p = PLAYERS.filter(function (x) { return x.lb && x.lb === u; })[0]; return p ? p.key : null; }
   function playerOf(login) { login = String(login || "").toLowerCase(); var p = PLAYERS.filter(function (x) { return x.github === login; })[0]; return p ? p.key : null; }
 
   /* ---------- tabs ---------- */
@@ -86,6 +87,28 @@
     txt = txt.replace(/https:\/\/[^\s)<>"]+/g, function (u) { urls.push(u); return " "; });
     return { urls: urls, text: txt.replace(/\s+/g, " ").trim() };
   }
+  function refNum(t) { var n = parseInt(String(t || "").replace(/[^0-9]/g, ""), 10); return isNaN(n) ? NaN : n; }
+  function lbFilms() {
+    var out = [], es = (S.lb && S.lb.entries) || {};
+    Object.keys(es).forEach(function (g) {
+      var e = es[g], player = playerOfLb(e.user); if (!player) return;
+      var num = refNum(g); if (isNaN(num)) return;
+      var rev = String(e.review || "");
+      var ig = (rev.match(/https?:\/\/(?:www\.)?instagram\.com\/[^\s<>"')]+/i) || [""])[0];
+      var reel = /instagram\.com\/(?:[^\/]+\/)?reels?\//i.test(ig);
+      var y = parseInt(e.year, 10);
+      var endOfDay = new Date(e.watchedDate + "T23:59:59+05:30");
+      var late = e.loggedAt ? (new Date(e.loggedAt) - endOfDay) > 24 * 3600 * 1000 : false;
+      out.push({ num: num, lb: true, url: e.link, player: player, at: e.loggedAt || e.firstSeen || "",
+        title: e.title || "Untitled", year: isNaN(y) ? null : y, date: e.watchedDate, insta: ig,
+        proof: ig ? (reel ? "Instagram reel" : "Instagram carousel") : "Letterboxd",
+        note: rev.replace(ig, "").replace(/#short\b/ig, "").trim(),
+        rewatch: !!e.rewatch, short: /#short\b/i.test(rev), review: reel,
+        late: late, removed: !!e.removed,
+        edited: (e.changes || []).some(function (c) { return c.field !== "removed"; }) });
+    });
+    return out;
+  }
   function parseList(text) {
     return String(text || "").split("\n").map(function (l) {
       l = l.replace(/^\s*(?:[-*•]\s*(?:\[[ xX]\]\s*)?|\d+[.)]\s*)/, "").trim();
@@ -109,7 +132,7 @@
     return before ? Object.assign({ state: "locking" }, before) : { state: "locking", director: "", items: [], url: null, none: true };
   }
   function themeFit(f) {
-    if (f.failed || f.copied) return false;
+    if (f.failed || f.copied || f.removed) return false;
     var wi = weekIndex(f.date); if (wi < 0) return false;
     var wl = effList(f.player); if (!wl) return false;
     var n = norm(f.title);
@@ -130,7 +153,7 @@
       var sec = sections(is.body);
       var base = { num: is.number, url: is.html_url, player: player, at: is.created_at || "" };
       var isFilm = "movie" in sec, isBonus = "what are you claiming?" in sec, isPay = "amount paid (₹)" in sec, isViol = "what's the violation?" in sec;
-      var isSpot = !isViol && "film issue number" in sec;
+      var isSpot = !isViol && ("film issue number" in sec || "film id" in sec);
       var isList = "my watchlist" in sec, isPicks = "pick 1" in sec, isVeto = "film you're vetoing" in sec;
       if (!isFilm && !isBonus && !isSpot && !isPay && !isViol && !isList && !isPicks && !isVeto) return;
       if (!player) { ignored++; return; }
@@ -162,19 +185,34 @@
       } else if (isViol) {
         var vk = String(sec["what's the violation?"] || "").toLowerCase();
         var vw = String(sec["week (for unpaid fines)"] || "").match(/Week\s*(\d)/i);
-        var vf = parseInt(String(sec["film issue number (for copied posts)"] || "").replace(/[^0-9]/g, ""), 10);
-        violations.push(Object.assign(base, { kind: vk.indexOf("unpaid") === 0 ? "unpaid" : (vk.indexOf("copied") === 0 ? "copied" : "other"), week: vw ? parseInt(vw[1], 10) - 1 : -1, film: isNaN(vf) ? null : vf, evidence: String(sec["evidence"] || "") }));
+        var vref = String(sec["film id (for copied posts)"] || sec["film issue number (for copied posts)"] || "");
+        var vf = refNum(vref);
+        violations.push(Object.assign(base, { kind: vk.indexOf("unpaid") === 0 ? "unpaid" : (vk.indexOf("copied") === 0 ? "copied" : "other"), week: vw ? parseInt(vw[1], 10) - 1 : -1, film: isNaN(vf) ? null : vf, ref: vref, evidence: String(sec["evidence"] || "") }));
       } else {
-        var fn = parseInt(String(sec["film issue number"] || "").replace(/[^0-9]/g, ""), 10);
-        spots.push(Object.assign(base, { film: fn, failed: /^failed/i.test(sec["result"] || "") }));
+        var fref = String(sec["film id"] || sec["film issue number"] || "");
+        spots.push(Object.assign(base, { film: refNum(fref), ref: fref, failed: /^failed/i.test(sec["result"] || "") }));
       }
     });
     // spot-checks: only the first 3 per player count, and only on the opponent's films
+    // Films logged on Letterboxd (synced hourly into data/letterboxd.json)
+    var lbf = lbFilms();
+    films = films.filter(function (f) { return !lbf.some(function (l) { return l.player === f.player && l.date === f.date && norm(l.title) === norm(f.title); }); }).concat(lbf);
+    // "Assigned" only counts if the film is one of the opponent's latest picks
+    films.forEach(function (f) {
+      var opp = PLAYERS.filter(function (p) { return p.key !== f.player; })[0];
+      var pk = opp ? picks.filter(function (x) { return x.player === opp.key; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0] : null;
+      f.assigned = !!(pk && pk.films.some(function (t) { return norm(t) === norm(f.title); }));
+    });
     spots.sort(function (a, b) { return a.at.localeCompare(b.at); });
     var used = {}; var failedNums = {};
     var filmByNum = {}; films.forEach(function (f) { filmByNum[f.num] = f; });
+    function findFilm(num, ref) {
+      if (filmByNum[num]) return filmByNum[num];
+      var r = String(ref || "").toLowerCase().replace(/\/+$/, "");
+      return r.indexOf("letterboxd.com/") >= 0 ? films.filter(function (f) { return f.lb && String(f.url).toLowerCase().replace(/\/+$/, "") === r; })[0] : null;
+    }
     spots.forEach(function (s) {
-      var f = filmByNum[s.film];
+      var f = findFilm(s.film, s.ref); if (f) s.film = f.num;
       s.valid = !!(f && f.player !== s.player) && (used[s.player] || 0) < 3;
       if (s.valid) { used[s.player] = (used[s.player] || 0) + 1; if (s.failed) failedNums[s.film] = true; }
     });
@@ -182,7 +220,7 @@
     // violations: filed against the other player
     violations.forEach(function (v) {
       v.against = PLAYERS.filter(function (p) { return p.key !== v.player; }).map(function (p) { return p.key; })[0] || null;
-      if (v.kind === "copied") { var f = filmByNum[v.film]; v.valid = !!(f && f.player !== v.player); if (v.valid) f.copied = true; }
+      if (v.kind === "copied") { var f = findFilm(v.film, v.ref); if (f) v.film = f.num; v.valid = !!(f && f.player !== v.player); if (v.valid) f.copied = true; }
       else if (v.kind === "unpaid") v.valid = v.week >= 0;
       else v.valid = true;
     });
@@ -191,8 +229,8 @@
   }
 
   /* ---------- scoring ---------- */
-  function filmValue(f) { return (f.failed || f.copied) ? 0 : ((f.rewatch || f.short) ? 0.5 : 1); }
-  function filmPoints(f) { if (f.copied) return -3; if (f.failed) return -2; var y = f.year; return filmValue(f) + ((y && y < 1980) ? 1 : 0) + (f.assigned ? 1 : 0) + (f.review ? 2 : 0); }
+  function filmValue(f) { return (f.failed || f.copied || f.removed) ? 0 : ((f.rewatch || f.short) ? 0.5 : 1); }
+  function filmPoints(f) { if (f.copied) return -3; if (f.failed) return -2; if (f.removed) return 0; var y = f.year; return filmValue(f) + ((y && y < 1980) ? 1 : 0) + (f.assigned ? 1 : 0) + (f.review ? 2 : 0); }
   function dayDiff(a, b) { return Math.round((new Date(b + "T12:00:00Z") - new Date(a + "T12:00:00Z")) / 86400000); }
   function daysLeftText(i) { var n = dayDiff(todayStr(), WEEKS[i].end) + 1; return n <= 1 ? "last day" : n + " days left"; }
   function liveDot() { return el("span", { cls: "live-dot", "aria-hidden": "true" }); }
@@ -386,6 +424,7 @@
     var u = $("updated"); clear(u);
     u.appendChild(el("strong", { style: "color:var(--ink)" }, [ci >= 0 ? liveDot() : null, now]));
     if (upd) u.appendChild(document.createTextNode(" · " + upd));
+    if (S.lb && S.lb.syncedAt) u.appendChild(document.createTextNode(" · Letterboxd synced " + new Date(S.lb.syncedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })));
   }
   function renderScore() {
     var box = $("score"); clear(box);
@@ -450,7 +489,7 @@
   function renderLog() {
     var t = $("logTbl"); clear(t);
     var rows = S.films.filter(function (f) { return S.filter === "all" || f.player === S.filter; }).slice().sort(function (a, b) { return (b.date || "").localeCompare(a.date || "") || b.num - a.num; });
-    t.appendChild(el("tr", null, [el("th", { text: "Date" }), el("th", { text: "Who" }), el("th", { text: "Movie" }), el("th", { text: "Proof" }), el("th", { text: "Pts" }), el("th", { text: "Issue" })]));
+    t.appendChild(el("tr", null, [el("th", { text: "Date" }), el("th", { text: "Who" }), el("th", { text: "Movie" }), el("th", { text: "Proof" }), el("th", { text: "Pts" }), el("th", { text: "Entry" })]));
     if (!rows.length) { t.appendChild(el("tr", null, [el("td", { colspan: "6", cls: "muted", text: S.loaded ? "No films logged yet. The first one sets the tone." : "Loading…" })])); return; }
     rows.forEach(function (f) {
       var p = pinfo(f.player) || { name: "?", cls: "" };
@@ -458,6 +497,9 @@
       [["rewatch", "Rewatch"], ["short", "Short"], ["assigned", "Assigned"], ["review", "Reel +2"]].forEach(function (x) { if (f[x[0]]) tags.appendChild(el("span", { cls: "tag", text: x[1] })); });
       if (themeFit(f)) tags.appendChild(el("span", { cls: "tag", style: "color:var(--ok);border-color:var(--ok)", text: "Theme ✓" }));
       if (f.year && f.year < 1980) tags.appendChild(el("span", { cls: "tag", text: "Pre-1980" }));
+      if (f.removed) tags.appendChild(el("span", { cls: "pill soon", text: "Deleted on Letterboxd" }));
+      if (f.late) tags.appendChild(el("span", { cls: "pill bad", text: "Logged late" }));
+      if (f.edited) tags.appendChild(el("span", { cls: "pill bad", text: "Edited after logging" }));
       if (f.copied) tags.appendChild(el("span", { cls: "pill bad", text: "Copied post" }));
       else if (f.failed) tags.appendChild(el("span", { cls: "pill bad", text: "Failed spot-check" }));
       var pp = proofParts(f.note), noteTxt = pp.text;
@@ -472,7 +514,7 @@
         el("td", null, [el("strong", { text: f.title }), f.year ? el("span", { cls: "muted", text: " (" + f.year + ")" }) : null, tags]),
         el("td", null, [el("div", { style: "font-size:13px", text: f.proof }), links, noteTxt ? el("div", { cls: "muted", style: "font-size:13px;max-width:280px", text: noteTxt.length > 140 ? noteTxt.slice(0, 140) + "…" : noteTxt }) : null]),
         el("td", { style: "font-weight:700;white-space:nowrap", text: (filmPoints(f) > 0 ? "+" : "") + num(filmPoints(f)) }),
-        el("td", null, [el("a", { href: f.url, target: "_blank", rel: "noopener", text: "#" + f.num })])
+        el("td", null, [el("a", { href: f.url, target: "_blank", rel: "noopener", text: f.lb ? "LB-" + f.num : "#" + f.num }), f.lb ? el("div", { cls: "muted", style: "font-size:11px", text: "Letterboxd" }) : null])
       ]));
     });
   }
@@ -494,8 +536,9 @@
         .then(function (list) { all = all.concat(list); if (list.length === 100 && n < 5) return page(n + 1); });
     }
     var lockedP = fetch("locked/watchlists.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
-    Promise.all([page(1), lockedP]).then(function (res) {
-      S.locked = res[1];
+    var lbP = fetch("data/letterboxd.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    Promise.all([page(1), lockedP, lbP]).then(function (res) {
+      S.locked = res[1]; S.lb = res[2];
       classify(all); S.loaded = true; S.updated = new Date();
       try { localStorage.setItem(CACHE, JSON.stringify(all)); } catch (e) {}
     }).catch(function (e) {
@@ -503,7 +546,10 @@
       S.error = e.message === "rate" ? "GitHub is limiting requests from this network for a bit. Showing the last saved scores; try Refresh in a few minutes."
         : e.message === "notfound" ? "Can't find the repo " + REPO + ". It must be public, and the name in config.js must match."
         : "Couldn't reach GitHub. Showing the last saved scores.";
-      try { var c = JSON.parse(localStorage.getItem(CACHE) || "null"); if (c) classify(c); } catch (x) {}
+      return Promise.all([lockedP, lbP]).then(function (r2) {
+        S.locked = r2[0]; S.lb = r2[1];
+        try { var c = JSON.parse(localStorage.getItem(CACHE) || "null"); classify(c || []); } catch (x) {}
+      });
     }).then(function () { $("refresh").disabled = false; render(); });
   }
   $("refresh").addEventListener("click", load);

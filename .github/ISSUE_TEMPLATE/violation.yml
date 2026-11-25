@@ -26,8 +26,9 @@ body:
   - type: input
     id: film
     attributes:
-      label: Film issue number (for copied posts)
-      placeholder: "12"
+      label: Film ID (for copied posts)
+      description: The film's ID from the Film log, like LB-574954935 or #12.
+      placeholder: "LB-574954935"
   - type: textarea
     id: evidence
     attributes:

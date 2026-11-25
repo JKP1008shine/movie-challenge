@@ -1,5 +1,5 @@
-name: "🎬 Log a film"
-description: Add a film you watched to the challenge log.
+name: "🎬 Log a film (backup)"
+description: Only if Letterboxd isn't working. Normally, log films on Letterboxd and the site picks them up.
 title: "[Film] "
 labels: ["film"]
 body:
@@ -82,4 +82,3 @@ body:
       options:
         - label: Rewatch (counts as half)
         - label: Short under 40 min (counts as half)
-        - label: Assigned by my opponent (+1)
