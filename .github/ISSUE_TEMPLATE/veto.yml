@@ -1,5 +1,5 @@
 name: "✋ Veto an assigned film"
-description: Reject one film your opponent assigned you. You get one veto.
+description: Reject one film your opponent assigned you. You get ONE veto for the whole month. It must be filed before that week's picks lock (Monday midnight).
 title: "[Veto] "
 labels: ["veto"]
 body:

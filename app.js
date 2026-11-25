@@ -4,12 +4,12 @@
   var REPO = CFG.repo;
   var PLAYERS = (CFG.players || []).map(function (p, i) { return { key: p.key, name: p.name, handle: String(p.github || ""), github: String(p.github || "").toLowerCase(), lb: String(p.letterboxd || "").toLowerCase(), cls: i === 0 ? "p1" : "p2" }; });
   var WEEKS = [
-    { start: "2026-12-01", end: "2026-12-06", min: 5, theme: "The Comeback" },
-    { start: "2026-12-07", end: "2026-12-13", min: 5, theme: "World Tour" },
-    { start: "2026-12-14", end: "2026-12-20", min: 5, theme: "Director Deep Dive" },
-    { start: "2026-12-21", end: "2026-12-27", min: 5, theme: "Decades Run" },
-    { start: "2026-12-28", end: "2026-12-31", min: 3, theme: "2026 Catch-up" }
+    { start: "2026-12-01", end: "2026-12-07", min: 7, theme: "The Comeback" },
+    { start: "2026-12-08", end: "2026-12-14", min: 6, theme: "World Tour" },
+    { start: "2026-12-15", end: "2026-12-21", min: 6, theme: "Director Deep Dive" },
+    { start: "2026-12-22", end: "2026-12-28", min: 6, theme: "Decades Run" }
   ];
+  var END = "2026-12-28", FREE_END = "2026-12-31", PICKS_PER_WEEK = 3, PICKS_SPARE = 3;
   var QUESTS = [
     { id: "theatre", match: "theatre", label: "Watched a film in a theatre", pts: 2 },
     { id: "silent", match: "silent", label: "Watched a silent film", pts: 2 },
@@ -19,8 +19,8 @@
     { id: "together", match: "debated together", label: "Watched + debated together", pts: 2 },
     { id: "convert", match: "converted a friend", label: "Converted a friend", pts: 2 }
   ];
-  var LOCK = new Date("2026-12-01T00:00:00+05:30");
-  function isLocked() { return new Date() >= LOCK; }
+  function lockAt(i) { return new Date(WEEKS[i].start + "T00:00:00+05:30"); }
+  function isLocked(i) { return new Date() >= lockAt(i); }
   var S = { films: [], bonuses: [], spots: [], ignored: 0, filter: "all", loaded: false, error: "", updated: null };
 
   function $(id) { return document.getElementById(id); }
@@ -59,7 +59,6 @@
   $("lnkPay").href = base + "payment.yml";
   $("lnkViol").href = base + "violation.yml";
   $("lnkList").href = base + "watchlist.yml";
-  if (isLocked()) { var lb = $("lnkList"); lb.removeAttribute("href"); lb.setAttribute("aria-disabled", "true"); lb.style.opacity = ".45"; lb.style.pointerEvents = "none"; lb.textContent = "Watchlists locked"; }
   $("lnkPicks").href = base + "assign.yml";
   $("lnkVeto").href = base + "veto.yml";
   var acct = $("acct");
@@ -117,26 +116,62 @@
       return { title: m[0].slice(0, 120), note: m.slice(1).join(" - ").slice(0, 120) };
     }).filter(Boolean).slice(0, 80);
   }
-  function weekTag(it) { var m = String(it.note || "").match(/week\s*(\d)/i); return m ? parseInt(m[1], 10) - 1 : -1; }
-  // The watchlist that counts: the locked copy from 1 Dec onwards, the latest draft before that.
-  function effList(key) {
-    var p = pinfo(key); if (!p) return null;
-    if (!isLocked()) { var d = latest(S.lists, key); return d ? Object.assign({ state: "draft" }, d) : null; }
-    if (S.locked) {
-      var e = S.locked.lists && S.locked.lists[p.github];
-      if (!e) return { state: "locked", director: "", items: [], url: null, none: true };
-      var sec = sections(e.body);
-      return { state: "locked", director: String(sec["week 3 director"] || "").slice(0, 80), items: parseList(sec["my watchlist"]), url: "https://github.com/" + REPO + "/blob/main/locked/watchlists.json", num: e.number };
+  function weekOfSec(v) { var m = String(v || "").match(/Week\s*(\d)/i); return m ? parseInt(m[1], 10) - 1 : -1; }
+  function parseListSec(sec) {
+    return { week: weekOfSec(sec["week"]), director: String(sec["week 3 director (week 3 only)"] || "").slice(0, 80),
+      items: parseList(sec["theme films"]).map(function (x) { x.theme = true; return x; }).concat(parseList(sec["other films"]).map(function (x) { x.theme = false; return x; })) };
+  }
+  function parsePicksSec(sec) {
+    var flags = sec["which picks fit this week's theme?"] || "";
+    var films = [1, 2, 3].map(function (n) { return { title: String(sec["pick " + n] || "").trim().slice(0, 120), theme: checked(flags, "pick " + n + " fits") }; }).filter(function (x) { return x.title; });
+    return { week: weekOfSec(sec["week"]), films: films, director: String(sec["week 3 only - the director your opponent must deep-dive"] || "").slice(0, 80), note: String(sec["note for your opponent"] || "").slice(0, 300) };
+  }
+  function latestFor(arr, key, i, beforeLock) {
+    return (arr || []).filter(function (x) { return x.player === key && x.week === i && (!beforeLock || new Date(x.at) < lockAt(i)); }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0] || null;
+  }
+  // The list (or picks) that counts for week i: the locked copy once the week has started, the latest draft before that.
+  function effective(kind, key, i) {
+    var p = pinfo(key); if (!p || i < 0) return null;
+    var arr = kind === "lists" ? S.lists : S.picks, parse = kind === "lists" ? parseListSec : parsePicksSec;
+    if (!isLocked(i)) { var d = latestFor(arr, key, i, false); return d ? Object.assign({ state: "draft" }, d) : null; }
+    var snap = S.locks && S.locks.weeks && S.locks.weeks[String(i + 1)];
+    if (snap) {
+      var e = snap[kind] && snap[kind][p.github];
+      if (!e) return { state: "locked", none: true, items: [], films: [], week: i };
+      return Object.assign({ state: "locked", url: "https://github.com/" + REPO + "/blob/main/locked/locks.json", num: e.number }, parse(sections(e.body)));
     }
-    var before = (S.lists || []).filter(function (x) { return x.player === key && new Date(x.at) < LOCK; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0];
-    return before ? Object.assign({ state: "locking" }, before) : { state: "locking", director: "", items: [], url: null, none: true };
+    var b = latestFor(arr, key, i, true);
+    return b ? Object.assign({ state: "locking" }, b) : { state: "locking", none: true, items: [], films: [], week: i };
+  }
+  function oppOf(key) { return PLAYERS.filter(function (p) { return p.key !== key; })[0] || null; }
+  // The one veto per month: the first one (by time) that names a pick made for this player, filed before that week locked.
+  function vetoFor(key) {
+    var opp = oppOf(key); if (!opp) return null;
+    var vs = (S.vetoes || []).filter(function (v) { return v.player === key; }).sort(function (a, b) { return a.at.localeCompare(b.at); });
+    for (var k = 0; k < vs.length; k++) {
+      for (var i = 0; i < WEEKS.length; i++) {
+        var hit = (S.picks || []).some(function (pk) { return pk.player === opp.key && pk.week === i && pk.films.some(function (f) { return norm(f.title) === norm(vs[k].film); }); });
+        if (hit && new Date(vs[k].at) < lockAt(i)) return Object.assign({ week: i }, vs[k]);
+      }
+    }
+    return null;
+  }
+  // Every pick made for this player, week by week.
+  function picksFor(key) {
+    var opp = oppOf(key), veto = vetoFor(key), out = [];
+    if (!opp) return out;
+    WEEKS.forEach(function (W, i) {
+      var pk = effective("picks", opp.key, i);
+      (pk && pk.films || []).forEach(function (f) { out.push({ title: f.title, theme: f.theme, week: i, vetoed: !!(veto && veto.week === i && norm(veto.film) === norm(f.title)) }); });
+    });
+    return out;
   }
   function themeFit(f) {
     if (f.failed || f.copied || f.removed) return false;
     var wi = weekIndex(f.date); if (wi < 0) return false;
-    var wl = effList(f.player); if (!wl) return false;
-    var n = norm(f.title);
-    return wl.items.some(function (it) { return weekTag(it) === wi && norm(it.title) === n; });
+    var n = norm(f.title), wl = effective("lists", f.player, wi);
+    if (wl && wl.items.some(function (it) { return it.theme && norm(it.title) === n; })) return true;
+    return picksFor(f.player).some(function (pk) { return pk.week === wi && pk.theme && !pk.vetoed && norm(pk.title) === n; });
   }
   function norm(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\(\s*\d{4}\s*\)/g, "").replace(/[^a-z0-9]+/g, " ").replace(/^\s*the\s+/, "").trim(); }
   function watchedBy(key, title) { var n = norm(title); return !!n && S.films.some(function (f) { return f.player === key && !f.copied && norm(f.title) === n; }); }
@@ -154,7 +189,7 @@
       var base = { num: is.number, url: is.html_url, player: player, at: is.created_at || "" };
       var isFilm = "movie" in sec, isBonus = "what are you claiming?" in sec, isPay = "amount paid (₹)" in sec, isViol = "what's the violation?" in sec;
       var isSpot = !isViol && ("film issue number" in sec || "film id" in sec);
-      var isList = "my watchlist" in sec, isPicks = "pick 1" in sec, isVeto = "film you're vetoing" in sec;
+      var isList = "theme films" in sec, isPicks = "pick 1" in sec, isVeto = "film you're vetoing" in sec;
       if (!isFilm && !isBonus && !isSpot && !isPay && !isViol && !isList && !isPicks && !isVeto) return;
       if (!player) { ignored++; return; }
       if (isFilm) {
@@ -173,9 +208,9 @@
         var wk = String(sec["which week? (needed for sick day pass)"] || "").match(/Week\s*(\d)/i);
         bonuses.push(Object.assign(base, { kind: String(sec["what are you claiming?"] || ""), week: wk ? parseInt(wk[1], 10) - 1 : -1 }));
       } else if (isList) {
-        lists.push(Object.assign(base, { director: String(sec["week 3 director"] || "").slice(0, 80), items: parseList(sec["my watchlist"]) }));
+        lists.push(Object.assign(base, parseListSec(sec)));
       } else if (isPicks) {
-        picks.push(Object.assign(base, { films: [sec["pick 1"], sec["pick 2"], sec["pick 3"]].map(function (x) { return String(x || "").trim().slice(0, 120); }).filter(Boolean), note: String(sec["note for your opponent"] || "").slice(0, 300) }));
+        picks.push(Object.assign(base, parsePicksSec(sec)));
       } else if (isVeto) {
         vetoes.push(Object.assign(base, { film: String(sec["film you're vetoing"] || "").trim().slice(0, 120), reason: String(sec["reason (optional)"] || "").slice(0, 300) }));
       } else if (isPay) {
@@ -197,12 +232,6 @@
     // Films logged on Letterboxd (synced hourly into data/letterboxd.json)
     var lbf = lbFilms();
     films = films.filter(function (f) { return !lbf.some(function (l) { return l.player === f.player && l.date === f.date && norm(l.title) === norm(f.title); }); }).concat(lbf);
-    // "Assigned" only counts if the film is one of the opponent's latest picks
-    films.forEach(function (f) {
-      var opp = PLAYERS.filter(function (p) { return p.key !== f.player; })[0];
-      var pk = opp ? picks.filter(function (x) { return x.player === opp.key; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0] : null;
-      f.assigned = !!(pk && pk.films.some(function (t) { return norm(t) === norm(f.title); }));
-    });
     spots.sort(function (a, b) { return a.at.localeCompare(b.at); });
     var used = {}; var failedNums = {};
     var filmByNum = {}; films.forEach(function (f) { filmByNum[f.num] = f; });
@@ -225,6 +254,12 @@
       else v.valid = true;
     });
     S.lists = lists; S.picks = picks; S.vetoes = vetoes;
+    // "Assigned" only counts if the film is one of the opponent's picks (not vetoed)
+    var pickCache = {};
+    films.forEach(function (f) {
+      var pl = pickCache[f.player] || (pickCache[f.player] = picksFor(f.player));
+      f.assigned = pl.some(function (pk) { return !pk.vetoed && norm(pk.title) === norm(f.title); });
+    });
     S.films = films; S.bonuses = bonuses; S.spots = spots; S.payments = payments; S.violations = violations; S.ignored = ignored; S.spotUsed = used;
   }
 
@@ -250,7 +285,11 @@
     });
     var films = 0, pts = 0;
     var weeks = WEEKS.map(function () { return { count: 0, theme: 0 }; });
-    fs.forEach(function (f) { films += filmValue(f); pts += filmPoints(f); var wi = weekIndex(f.date); if (wi >= 0) { weeks[wi].count += filmValue(f); if (themeFit(f)) weeks[wi].theme++; } });
+    fs.forEach(function (f) { var wi = weekIndex(f.date); if (wi < 0) return; films += filmValue(f); pts += filmPoints(f); weeks[wi].count += filmValue(f); if (themeFit(f)) weeks[wi].theme++; });
+    // Picks: watch at least (picks given - 3), i.e. 9 of 12; -3 points per pick short, counted after the last week
+    var pl = picksFor(key).filter(function (x) { return !x.vetoed; });
+    var pw = pl.filter(function (x) { return fs.some(function (f) { return weekIndex(f.date) >= 0 && !f.failed && !f.copied && !f.removed && norm(f.title) === norm(x.title); }); }).length;
+    var pneed = Math.max(0, pl.length - PICKS_SPARE), pshort = today > END ? Math.max(0, pneed - pw) : 0;
     var missed = 0, owes = 0, themeBonus = 0;
     weeks.forEach(function (w, i) {
       var W = WEEKS[i]; w.done = w.theme >= 2; if (w.done) themeBonus += 2;
@@ -277,95 +316,84 @@
     var paidTotal = weeks.reduce(function (t, w) { return t + w.paid; }, 0);
     var outstanding = weeks.reduce(function (t, w) { return t + Math.max(0, w.due - w.paid); }, 0);
     var extra = don || 0;
-    return { films: films, pts: pts, themeBonus: themeBonus, qpts: qpts, extra: extra, don: don, missed: missed, owes: owes, paid: paidTotal, outstanding: outstanding, total: pts + themeBonus + qpts + extra - 3 * missed, weeks: weeks, count: fs.length, sick: sick, quests: quests, spot: (S.spotUsed && S.spotUsed[key]) || 0 };
+    var picks = { total: pl.length, watched: pw, need: pneed, short: pshort };
+    return { films: films, pts: pts, themeBonus: themeBonus, qpts: qpts, extra: extra, don: don, missed: missed, owes: owes, paid: paidTotal, outstanding: outstanding, total: pts + themeBonus + qpts + extra - 3 * missed - 3 * pshort, picks: picks, weeks: weeks, count: fs.length, sick: sick, quests: quests, spot: (S.spotUsed && S.spotUsed[key]) || 0 };
   }
 
   /* ---------- render ---------- */
   function render() { renderStatus(); renderScore(); renderWeeks(); renderPot(); renderExtras(); renderLog(); renderWatch(); }
-  function readiness(wl, picksFor) {
-    var issues = [], good = [];
-    var items = wl ? wl.items : [];
-    var seen = {}; var all = [];
-    items.concat((picksFor || []).map(function (t) { return { title: t, note: "", pick: true }; })).forEach(function (it) { var n = norm(it.title); if (n && !seen[n]) { seen[n] = true; all.push(it); } });
-    var total = all.length;
-    if (total < 25) issues.push("Only " + total + " films planned. Add " + (25 - total) + " more to reach 25.");
-    else if (total < 30) issues.push(total + " films planned: enough for 25, but add " + (30 - total) + " spare" + (30 - total === 1 ? "" : "s") + " in case a film isn't available.");
-    else good.push(total + " films planned, with spares");
-    var weekOf = weekTag;
-    var yearOf = function (it) { var m = (String(it.title) + " " + String(it.note || "")).match(/\b(19\d{2}|20\d{2})\b/); return m ? parseInt(m[1], 10) : null; };
-    var NEED = [2, 2, 3, 5, 2];
-    var byWeek = WEEKS.map(function (_, i) { return items.filter(function (it) { return weekOf(it) === i; }); });
-    var untagged = items.filter(function (it) { return weekOf(it) < 0; }).length;
-    byWeek.forEach(function (list, i) {
-      if (list.length < NEED[i]) issues.push("Week " + (i + 1) + " (" + WEEKS[i].theme + "): " + list.length + " of " + NEED[i] + " tagged.");
+  function yearOf(t) { var m = String(t || "").match(/\b(19\d{2}|20\d{2})\b/); return m ? parseInt(m[1], 10) : null; }
+  // What's missing from a player's plan for week i (their list + the picks made for them).
+  function readinessWeek(key, i) {
+    var W = WEEKS[i], wl = effective("lists", key, i), issues = [];
+    var picks = picksFor(key).filter(function (x) { return x.week === i && !x.vetoed; });
+    var seen = {}, planned = 0, themed = [];
+    (wl ? wl.items : []).map(function (it) { return { title: it.title, theme: it.theme }; }).concat(picks).forEach(function (it) {
+      var n = norm(it.title); if (!n || seen[n]) return; seen[n] = true; planned++; if (it.theme) themed.push(it);
     });
-    if (!wl || !wl.director) issues.push("Week 3 director not declared.");
-    var decades = [1960, 1970, 1980, 1990, 2000];
-    var w4 = byWeek[3].map(yearOf).filter(Boolean);
-    var missingDec = decades.filter(function (d) { return !w4.some(function (y) { return y >= d && y < d + 10; }); });
-    if (byWeek[3].length && missingDec.length) issues.push("Week 4 decades missing (add years in brackets): " + missingDec.map(function (d) { return "'" + String(d).slice(2) + "s"; }).join(", ") + ".");
-    var w5 = byWeek[4], not26 = w5.filter(function (it) { var y = yearOf(it); return y && y !== 2026; });
-    if (not26.length) issues.push("Week 5 should be 2026 releases: " + not26.map(function (it) { return it.title; }).join(", ") + ".");
-    if (!issues.length) { good.push("every theme covered"); if (untagged) good.push(untagged + " free pick" + (untagged === 1 ? "" : "s")); }
-    return { ok: !issues.length, issues: issues, good: good, untagged: untagged };
+    if (!wl) issues.push("No list shared yet.");
+    if (planned < W.min) issues.push(planned + " of " + W.min + " films planned (your list + their picks). Add " + (W.min - planned) + " more.");
+    if (themed.length < 2) issues.push(themed.length + " of 2 theme films.");
+    if (picks.length < PICKS_PER_WEEK) issues.push("Waiting for " + (oppOf(key) ? oppOf(key).name : "your opponent") + "'s " + PICKS_PER_WEEK + " picks (" + picks.length + " so far).");
+    if (i === 2 && !directorFor(key)) issues.push("Waiting for " + (oppOf(key) ? oppOf(key).name : "your opponent") + " to pick your Week 3 director.");
+    if (i === 3) {
+      var ys = themed.map(function (x) { return yearOf(x.title); }).filter(Boolean);
+      var miss = [1960, 1970, 1980, 1990, 2000].filter(function (d) { return !ys.some(function (y) { return y >= d && y < d + 10; }); });
+      if (miss.length) issues.push("Decades not covered by theme films (add years in brackets): " + miss.map(function (d) { return "'" + String(d).slice(2) + "s"; }).join(", ") + ".");
+    }
+    return { ok: !issues.length, issues: issues, planned: planned };
   }
-  function latest(arr, key) { return (arr || []).filter(function (x) { return x.player === key; }).sort(function (a, b) { return b.at.localeCompare(a.at); })[0] || null; }
+  // Week 3: the director is chosen by the opponent, sent with their Week 3 picks.
+  function directorFor(key) { var opp = oppOf(key); var pk = opp ? effective("picks", opp.key, 2) : null; return pk && pk.director ? pk.director : ""; }
+  function lockLabel(i) { var d = addDays(WEEKS[i].start, -1); return "Mon " + fmtDate(d) + ", midnight"; }
   function renderWatch() {
     var box = $("watchBox"); clear(box);
+    var t = todayStr(), cur = weekIndex(t);
+    var nextOpen = -1; for (var k = 0; k < WEEKS.length; k++) if (!isLocked(k)) { nextOpen = k; break; }
     PLAYERS.forEach(function (p) {
-      var opp = PLAYERS.filter(function (x) { return x.key !== p.key; })[0];
+      var opp = oppOf(p.key), r = calc(p.key), veto = vetoFor(p.key);
       var card = el("article", { cls: "pcard " + p.cls }, [el("div", { cls: "pname", style: "font-size:24px", text: p.name.toUpperCase() })]);
-      // watchlist
-      var wl = effList(p.key);
-      var lockTxt = wl && wl.state === "locked" ? "🔒 Locked on 1 Dec" : (isLocked() ? "🔒 Locking…" : "Draft · locks Tue 1 Dec, 12:00 am");
-      card.appendChild(el("span", { cls: "pill " + (isLocked() ? "soon" : "wip"), style: "align-self:flex-start", text: lockTxt }));
-      if (wl && wl.none) wl = null;
-      var head = el("div", { style: "display:flex;justify-content:space-between;align-items:baseline;gap:8px" }, [el("strong", { text: "Watchlist" })]);
-      card.appendChild(head);
-      if (!wl) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: !S.loaded ? "Loading…" : (isLocked() ? "No watchlist was shared before the lock, so no films count towards themes." : "Not added yet.") }));
-      else {
-        var done = wl.items.filter(function (it) { return watchedBy(p.key, it.title); }).length;
-        head.appendChild(el("span", { cls: "muted", style: "font-size:13px" }, [done + " of " + wl.items.length + " watched", wl.url ? " · " : null, wl.url ? el("a", { href: wl.url, target: "_blank", rel: "noopener", text: wl.state === "draft" ? "edit" : (wl.state === "locked" ? "locked copy" : "list") }) : null]));
-        card.appendChild(el("div", { style: "font-size:14px" }, [el("strong", { text: "Week 3 director: " }), wl.director || "not declared yet"]));
-        var ql = el("div", { cls: "qlist" });
-        wl.items.forEach(function (it) {
-          var w = watchedBy(p.key, it.title);
-          ql.appendChild(el("label", null, [el("span", { "aria-hidden": "true", style: "width:18px;text-align:center;font-weight:700;color:" + (w ? "var(--ok)" : "#bbb"), text: w ? "✓" : "○" }), el("span", { style: w ? "color:var(--mute)" : null, text: it.title }), it.note ? el("span", { cls: "muted", style: "margin-left:auto;font-size:12px;text-align:right", text: it.note }) : null]));
-        });
-        card.appendChild(ql);
-      }
-      // picks for this player (made by opponent)
-      var pk = opp ? latest(S.picks, opp.key) : null;
-      var vetoAll = (S.vetoes || []).filter(function (v) { return v.player === p.key; }).sort(function (a, b) { return a.at.localeCompare(b.at); });
-      var allOppPicks = (S.picks || []).filter(function (x) { return opp && x.player === opp.key; }).reduce(function (a, x) { return a.concat(x.films); }, []);
-      var veto = vetoAll.filter(function (v) { return allOppPicks.some(function (t) { return norm(t) === norm(v.film); }); })[0] || null;
-      if (wl && !isLocked()) {
-        var vetoT = veto ? norm(veto.film) : null;
-        var rd = readiness(wl, pk ? pk.films.filter(function (t) { return norm(t) !== vetoT; }) : []);
-        var rbox = el("div", { style: "border-radius:10px;padding:10px 12px;font-size:14px;background:" + (rd.ok ? "var(--okbg)" : "var(--warnbg)") + ";color:" + (rd.ok ? "var(--ok)" : "#4A3500") }, [
-          el("strong", { text: rd.ok ? "✓ Ready for 1 December" : "Not ready yet" }),
-          rd.good.length ? el("div", { style: "font-size:13px", text: rd.good.join(" · ") }) : null
-        ]);
-        if (rd.issues.length) rbox.appendChild(el("ul", { style: "margin:4px 0 0;padding-left:18px" }, rd.issues.map(function (x) { return el("li", { text: x }); })));
-        if (rd.untagged && !rd.ok) rbox.appendChild(el("div", { style: "font-size:12px;margin-top:4px;opacity:.85", text: rd.untagged + " film" + (rd.untagged === 1 ? " has" : "s have") + " no week tag. Add “- Week N” after a title to count it towards a theme." }));
-        card.insertBefore(rbox, card.children[2]);
-      }
-      card.appendChild(el("strong", { style: "margin-top:4px", text: "Picked for " + p.name + " by " + (opp ? opp.name : "?") }));
-      if (!pk) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:14px", text: "No picks yet." }));
-      else {
-        var pl = el("div", { cls: "qlist" });
-        pk.films.forEach(function (t) {
-          var vetoed = veto && norm(veto.film) === norm(t), w = watchedBy(p.key, t);
-          pl.appendChild(el("label", null, [el("span", { style: vetoed ? "text-decoration:line-through;color:var(--mute)" : null, text: t }), el("span", { cls: "pill " + (vetoed ? "bad" : w ? "ok" : "soon"), style: "margin-left:auto", text: vetoed ? "Vetoed" : w ? "Watched" : "To watch" })]));
-        });
-        if (veto && !pk.films.some(function (t) { return norm(t) === norm(veto.film); })) {
-          pl.appendChild(el("label", null, [el("span", { style: "text-decoration:line-through;color:var(--mute)", text: veto.film }), el("span", { cls: "pill bad", style: "margin-left:auto", text: "Vetoed · replaced" })]));
+      card.appendChild(el("div", { style: "font-size:14px" }, [
+        el("strong", { text: "Picks watched: " }), r.picks.watched + " of " + r.picks.total + (r.picks.total ? " (need " + r.picks.need + ")" : ""),
+        el("br"), el("strong", { text: "Veto: " }), veto ? "used on " + veto.film + " (week " + (veto.week + 1) + ")" : "not used yet (one for the month)"
+      ]));
+      WEEKS.forEach(function (W, i) {
+        var wl = effective("lists", p.key, i);
+        var picks = picksFor(p.key).filter(function (x) { return x.week === i; });
+        var state = isLocked(i) ? (wl && wl.state === "locked" ? "🔒 Locked" : "🔒 Locking…") : "Draft · locks " + lockLabel(i);
+        var open = i === cur || i === nextOpen;
+        var det = el("details", { cls: "ht", open: open ? true : null });
+        det.appendChild(el("summary", null, [i === cur ? liveDot() : null, "Week " + (i + 1) + " · " + W.theme + " ", el("span", { cls: "pill " + (isLocked(i) ? "soon" : "wip"), style: "margin-left:6px", text: state })]));
+        det.appendChild(el("div", { cls: "muted", style: "font-size:12px;margin-bottom:6px", text: fmtDate(W.start) + " – " + fmtDate(W.end) + " · " + W.min + " films" }));
+        if (!isLocked(i) && i === nextOpen && S.loaded) {
+          var rd = readinessWeek(p.key, i);
+          var rb = el("div", { style: "border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:13px;background:" + (rd.ok ? "var(--okbg)" : "var(--warnbg)") + ";color:" + (rd.ok ? "var(--ok)" : "#4A3500") }, [el("strong", { text: rd.ok ? "✓ Ready for week " + (i + 1) : "Not ready yet" })]);
+          if (rd.issues.length) rb.appendChild(el("ul", { style: "margin:4px 0 0;padding-left:18px" }, rd.issues.map(function (x) { return el("li", { text: x }); })));
+          det.appendChild(rb);
         }
-        card.appendChild(pl);
-        if (veto && pk.films.some(function (t) { return norm(t) === norm(veto.film); })) card.appendChild(el("p", { style: "margin:0;font-size:13px;color:var(--red-d)", text: (opp ? opp.name : "Their opponent") + " needs to send a replacement pick." }));
-        if (pk.note) card.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:13px", text: "“" + pk.note + "”" }));
-      }
-      card.appendChild(el("div", { style: "font-size:14px" }, [el("strong", { text: "Veto: " }), veto ? "used on " + veto.film : "not used yet"]));
+        if (i === 2) det.appendChild(el("div", { style: "font-size:14px;margin-bottom:6px" }, [el("strong", { text: "Director, picked by " + (opp ? opp.name : "?") + ": " }), directorFor(p.key) || "not picked yet"]));
+        if (wl && !wl.none) {
+          var ql = el("div", { cls: "qlist" });
+          wl.items.forEach(function (it) {
+            var w = watchedBy(p.key, it.title);
+            ql.appendChild(el("label", null, [el("span", { "aria-hidden": "true", style: "width:18px;text-align:center;font-weight:700;color:" + (w ? "var(--ok)" : "#bbb"), text: w ? "✓" : "○" }), el("span", { style: w ? "color:var(--mute)" : null, text: it.title }), it.theme ? el("span", { cls: "tag", style: "margin-left:auto", text: "Theme" }) : null]));
+          });
+          det.appendChild(el("div", { style: "display:flex;justify-content:space-between;font-size:13px" }, [el("strong", { text: p.name + "'s list" }), wl.url ? el("a", { href: wl.url, target: "_blank", rel: "noopener", text: wl.state === "draft" ? "edit" : "locked copy" }) : null]));
+          det.appendChild(ql);
+        } else det.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:13px", text: !S.loaded ? "Loading…" : (isLocked(i) ? "No list was shared before the lock: no theme films from a list this week." : "No list yet.") }));
+        det.appendChild(el("strong", { style: "display:block;font-size:13px;margin-top:8px", text: "Picked by " + (opp ? opp.name : "?") }));
+        if (!picks.length) det.appendChild(el("p", { cls: "muted", style: "margin:0;font-size:13px", text: "No picks yet." }));
+        else {
+          var pl = el("div", { cls: "qlist" });
+          picks.forEach(function (x) {
+            var w = watchedBy(p.key, x.title);
+            pl.appendChild(el("label", null, [el("span", { style: x.vetoed ? "text-decoration:line-through;color:var(--mute)" : null, text: x.title }), x.theme && !x.vetoed ? el("span", { cls: "tag", text: "Theme" }) : null, el("span", { cls: "pill " + (x.vetoed ? "bad" : w ? "ok" : "soon"), style: "margin-left:auto", text: x.vetoed ? "Vetoed" : w ? "Watched" : "To watch" })]));
+          });
+          det.appendChild(pl);
+          if (picks.some(function (x) { return x.vetoed; }) && !isLocked(i)) det.appendChild(el("p", { style: "margin:4px 0 0;font-size:12px;color:var(--red-d)", text: (opp ? opp.name : "Their opponent") + " needs to submit this week's picks again with a replacement before the lock." }));
+        }
+        card.appendChild(det);
+      });
       box.appendChild(card);
     });
   }
@@ -419,6 +447,7 @@
     var t = todayStr(), now = "", ci = weekIndex(t);
     if (t < WEEKS[0].start) { var d = dayDiff(t, WEEKS[0].start); now = "Starts Tue 1 Dec, " + (d === 1 ? "tomorrow" : "in " + d + " days") + " · Week 1: " + WEEKS[0].theme; }
     else if (ci >= 0) now = "Week " + (ci + 1) + " of " + WEEKS.length + " · " + WEEKS[ci].theme + " · " + daysLeftText(ci);
+    else if (t <= FREE_END) now = "Challenge over · free days until 31 Dec, just for fun";
     else now = "Challenge over · final scores";
     var upd = S.updated ? "Updated " + S.updated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : (S.loaded ? "" : "Loading…");
     var u = $("updated"); clear(u);
@@ -437,7 +466,8 @@
       box.appendChild(el("article", { cls: "pcard " + p.cls, "aria-label": p.name + " scorecard" }, [
         el("header", null, [el("div", null, [el("div", { cls: "pname", text: p.name.toUpperCase() }), el("div", { cls: "muted", style: "font-size:12px", text: "@" + p.handle })]), leader === p.key && anyFilms ? el("span", { cls: "lead", text: "LEADING" }) : null]),
         el("div", null, [el("div", { style: "display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px" }, [el("span", { text: num(r.films) + " of 25 films" }), el("span", { text: pct + "%" })]),
-          el("div", { cls: "bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "25", "aria-valuenow": String(r.films), "aria-label": p.name + " progress to 25 films" }, [el("i", { style: "width:" + pct + "%" })])]),
+          el("div", { cls: "bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "25", "aria-valuenow": String(r.films), "aria-label": p.name + " progress to 25 films" }, [el("i", { style: "width:" + pct + "%" })]),
+          el("div", { style: "font-size:13px;margin-top:6px;color:" + (r.picks.short ? "var(--red-d)" : "var(--mute)"), text: "Picks watched " + r.picks.watched + " of " + r.picks.total + (r.picks.total ? " · need " + r.picks.need : "") + (r.picks.short ? " · −" + (3 * r.picks.short) + " points" : "") })]),
         el("div", { cls: "stats" }, [
           el("div", { cls: "stat" }, [el("b", { text: num(r.total) }), el("span", { text: "final score" })]),
           el("div", { cls: "stat" }, [el("b", { text: num(r.pts) }), el("span", { text: "film points" })]),
@@ -447,7 +477,7 @@
       ]));
     });
     var collected = PLAYERS.reduce(function (s, p) { return s + c[p.key].paid; }, 0);
-    box.appendChild(el("p", { cls: "muted", style: "grid-column:1/-1;margin:0;font-size:14px", text: "Pot collected: " + rupees(collected) + ". Fines are ₹200 per film short of each week's minimum, payable by the Tuesday after." }));
+    box.appendChild(el("p", { cls: "muted", style: "grid-column:1/-1;margin:0;font-size:14px", text: "Pot collected: " + rupees(collected) + ". Fines are ₹200 per film short of each week's minimum, payable by the Wednesday after the week ends." }));
   }
   function renderWeeks() {
     var t = $("weekTbl"); clear(t);
@@ -535,10 +565,10 @@
         })
         .then(function (list) { all = all.concat(list); if (list.length === 100 && n < 5) return page(n + 1); });
     }
-    var lockedP = fetch("locked/watchlists.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    var lockedP = fetch("locked/locks.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     var lbP = fetch("data/letterboxd.json", { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     Promise.all([page(1), lockedP, lbP]).then(function (res) {
-      S.locked = res[1]; S.lb = res[2];
+      S.locks = res[1]; S.lb = res[2];
       classify(all); S.loaded = true; S.updated = new Date();
       try { localStorage.setItem(CACHE, JSON.stringify(all)); } catch (e) {}
     }).catch(function (e) {
@@ -547,7 +577,7 @@
         : e.message === "notfound" ? "Can't find the repo " + REPO + ". It must be public, and the name in config.js must match."
         : "Couldn't reach GitHub. Showing the last saved scores.";
       return Promise.all([lockedP, lbP]).then(function (r2) {
-        S.locked = r2[0]; S.lb = r2[1];
+        S.locks = r2[0]; S.lb = r2[1];
         try { var c = JSON.parse(localStorage.getItem(CACHE) || "null"); classify(c || []); } catch (x) {}
       });
     }).then(function () { $("refresh").disabled = false; render(); });

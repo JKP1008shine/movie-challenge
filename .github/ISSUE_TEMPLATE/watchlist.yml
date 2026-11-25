@@ -1,20 +1,28 @@
-name: "📋 Update my watchlist"
-description: Your list of films for the challenge, and your Week 3 director. Draft it as often as you like; it locks at 12:00 am on Tue 1 Dec.
+name: "📋 Share a weekly watchlist"
+description: Your films for one week. Each week's list locks at 12:00 am on the Tuesday it starts (Monday midnight). Submit again to change it before then; your latest list for that week counts.
 title: "[Watchlist] "
 labels: ["watchlist"]
 body:
-  - type: input
-    id: director
+  - type: dropdown
+    id: week
     attributes:
-      label: Week 3 director
-      placeholder: e.g. Satyajit Ray
-  - type: textarea
-    id: list
-    attributes:
-      label: My watchlist
-      description: "One film per line. You can add the week or a note after a dash, for example: Tokyo Story (1953) - Week 1"
-      placeholder: |
-        Tokyo Story (1953) - Week 1
-        Parasite (2019) - Week 2, South Korea
+      label: Week
+      options:
+        - "Week 1 (1-7 Dec) · The Comeback"
+        - "Week 2 (8-14 Dec) · World Tour"
+        - "Week 3 (15-21 Dec) · Director Deep Dive"
+        - "Week 4 (22-28 Dec) · Decades Run"
     validations:
       required: true
+  - type: textarea
+    id: theme
+    attributes:
+      label: Theme films
+      description: "At least 2 films that fit this week's theme, one per line. Add the year in brackets, like: Jaws (1975). Your opponent's picks can count too. Week 3: films by the director your opponent chose for you."
+    validations:
+      required: true
+  - type: textarea
+    id: other
+    attributes:
+      label: Other films
+      description: Your free picks for the week, one per line.

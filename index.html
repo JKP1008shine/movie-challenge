@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>25 Films. 31 Days. — Sinjini vs Sankalp</title>
+<title>25 Films. 28 Days. — Sinjini vs Sankalp</title>
 <style>
 @font-face{font-family:"Anton";src:url("assets/Anton.ttf") format("truetype");font-display:swap}
 :root{--red:#B3261E;--red-d:#8A1C16;--tint:#FBEDEC;--ink:#1A1A1A;--mute:#5C5552;--line:#E4E0DE;--bg:#FAF8F7;--card:#fff;--ok:#1E6B3A;--okbg:#E6F2EA;--warn:#8A5A00;--warnbg:#FDF3DC;--p1:#6A3FB5;--p1bg:#EFE8FA;--p2:#0F6E6E;--p2bg:#E2F3F2}
@@ -114,7 +114,7 @@ tr.wk-past td{opacity:.6}
 <body>
 <div class="top">
   <div class="wrap">
-    <h1 class="brand disp">25 FILMS. 31 DAYS.<small>SINJINI vs SANKALP · 1–31 DEC 2026</small></h1>
+    <h1 class="brand disp">25 FILMS. 28 DAYS.<small>SINJINI vs SANKALP · 1–28 DEC 2026</small></h1>
     <div class="acct" id="acct"></div>
     <nav class="tabs" aria-label="Sections">
       <a href="#tracker" data-tab="tracker">Tracker</a>
@@ -172,12 +172,12 @@ tr.wk-past td{opacity:.6}
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
       <h2 id="t-watch" style="margin:0">Watchlists &amp; picks</h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <a class="btn" id="lnkList" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Update my watchlist</a>
+        <a class="btn" id="lnkList" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Share a weekly watchlist</a>
         <a class="btn ghost" id="lnkPicks" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Assign films</a>
         <a class="btn ghost" id="lnkVeto" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Veto a film</a>
       </div>
     </div>
-    <p class="muted" style="font-size:13px;margin:6px 0 14px">Watchlists are drafts until <strong>12:00 am on Tue 1 Dec</strong>, then they lock. Your locked list decides your theme films. Films tick off once they're logged with the same title.</p>
+    <p class="muted" style="font-size:13px;margin:6px 0 14px">One list and 3 picks per week. Each week's list and picks are drafts until <strong>midnight on the Monday before</strong> the week starts, then they lock. Theme films come from the locked list and the picks marked as theme. Films tick off once they're logged with the same title.</p>
     <div class="score" id="watchBox"></div>
   </section>
 
@@ -197,7 +197,7 @@ tr.wk-past td{opacity:.6}
     <details class="ht"><summary>Find your GitHub username</summary>
       <ol><li>Sign in at github.com.</li><li>Tap your profile picture (top right).</li><li>Your username is the bold name at the top of the menu, also shown in your profile link: github.com/<em>username</em>.</li></ol></details>
     <details class="ht"><summary>Before 1 December: what to prep</summary>
-      <p>Build your watchlist, pick 3 films for your opponent, declare your Week 3 director and test your setup. The full list and timeline are in the Rulebook: <a href="#r-prep">Before Day 1: prep</a>.</p></details>
+      <p>Share your Week 1 watchlist, pick your opponent's 3 films for Week 1, and test your setup, all by Mon 30 Nov. After that it's the same every week. The full list and timeline are in the Rulebook: <a href="#r-prep">Before Day 1: prep</a>.</p></details>
 
     <h3 id="h-log">Logging films</h3>
     <details class="ht" open><summary>Log a film (on Letterboxd)</summary>
@@ -217,7 +217,7 @@ tr.wk-past td{opacity:.6}
         <li><strong>Short:</strong> from <code>#short</code> in your review.</li>
         <li><strong>Assigned by your opponent (+1):</strong> when the film matches one of their picks on the Watchlists tab. No need to tick anything.</li>
         <li><strong>Pre-1980 (+1):</strong> from the film's year on Letterboxd.</li>
-        <li><strong>Theme films:</strong> from your locked watchlist. A film counts if it's tagged for the week you watched it.</li>
+        <li><strong>Theme films:</strong> from that week's locked watchlist (theme films) and your opponent's picks marked as theme, watched in that week.</li>
       </ul></details>
     <details class="ht"><summary>The red flags on a film</summary>
       <ul>
@@ -235,14 +235,16 @@ tr.wk-past td{opacity:.6}
       <p>Tap <strong>Backup log form</strong> on the Tracker. It's a GitHub form with the same details. Use it only if the site can't read your diary; a film logged both ways counts once.</p></details>
 
     <h3 id="h-watch">Watchlists, picks &amp; vetoes</h3>
-    <details class="ht"><summary>Add or update your watchlist</summary>
-      <ol><li>Open the <strong>Watchlists</strong> tab and tap <strong>“Update my watchlist”</strong>.</li><li>Enter your Week 3 director, then your films, one per line. Add the week or a note after a dash, like <em>Tokyo Story (1953) - Week 1</em>.</li><li>Submit. To change it later, tap <strong>edit</strong> next to your list, then the <strong>…</strong> menu and <strong>Edit</strong>. Your most recent list is the one shown.</li><li>Films tick off by themselves once you log them with the same title.</li></ol>
-      <p><strong>The readiness check:</strong> the box at the top of your card turns green (“Ready for 1 December”) once your list has 25+ films (your opponent's picks count too), enough films tagged for every theme, a Week 3 director, one film per decade for Week 4 (write the year in brackets) and 2026 releases for Week 5. Until then it lists what's missing.</p>
-      <p><strong>The lock:</strong> at 12:00 am on Tue 1 Dec, both watchlists are saved and locked. After that, edits don't count. Your locked list decides your theme films: a film counts towards a week's theme only if it's tagged for that week and you watch it that week. Tag carefully before the lock.</p></details>
-    <details class="ht"><summary>Assign your opponent their 3 films</summary>
-      <ol><li>On the Watchlists tab, tap <strong>“Assign films”</strong>.</li><li>Enter your 3 picks and an optional note, then submit.</li><li>They show on your opponent's card as <strong>To watch</strong>, then <strong>Watched</strong> once logged.</li></ol></details>
-    <details class="ht"><summary>Veto a film, and replace a vetoed pick</summary>
-      <ol><li>To veto, tap <strong>“Veto a film”</strong> and type the title exactly as it appears in their picks. You get one.</li><li>The film shows as <strong>Vetoed</strong>, with a note that a replacement is needed.</li><li>To replace it, the picker taps <strong>“Assign films”</strong> again and submits all 3 picks, with the new one swapped in. The latest picks count.</li></ol></details>
+    <details class="ht"><summary>Share a weekly watchlist</summary>
+      <ol><li>On the <strong>Watchlists</strong> tab, tap <strong>“Share a weekly watchlist”</strong>.</li><li>Pick the <strong>week</strong>.</li><li>Under <strong>Theme films</strong>, list at least 2 films that fit that week's theme, one per line, with the year in brackets: <em>Jaws (1975)</em>.</li><li>Under <strong>Other films</strong>, list the rest of your plan for the week.</li><li>For Week 3, list 3+ films by the director your opponent picked for you. It shows on your card once they've chosen.</li><li>Submit. To change it, submit again for the same week: your latest list counts.</li></ol>
+      <p><strong>The lock:</strong> each week's list locks at <strong>midnight on the Monday before</strong> that week (Week 1: Mon 30 Nov). After that, changes don't count. Lists for later weeks stay open until their own lock.</p></details>
+    <details class="ht"><summary>The readiness box</summary>
+      <p>Your card shows a box for the next week that hasn't locked yet. It turns green (“Ready for week N”) once you have: enough films planned for the target (your list plus your opponent's 3 picks), 2+ theme films (theme picks count), your opponent's 3 picks, your Week 3 director (picked by your opponent), and films from all 5 decades for Week 4 (years in brackets). Until then it lists what's missing.</p></details>
+    <details class="ht"><summary>Pick your opponent's 3 films each week</summary>
+      <ol><li>On the Watchlists tab, tap <strong>“Assign films”</strong>.</li><li>Pick the week and enter 3 films.</li><li>Tick any that fit that week's theme: they count as theme films for your opponent.</li><li><strong>Week 3 only:</strong> enter the director your opponent must deep-dive. They pick which of that director's films to watch.</li><li>Submit <strong>by Sunday night</strong> before the week. They lock with the lists at Monday midnight.</li></ol>
+      <p>Across the month that's 12 picks. Your opponent must watch at least 9 by 28 Dec, or lose 3 points for each one short. The +1 for an assigned film is added by itself when they log it.</p></details>
+    <details class="ht"><summary>Use your one veto</summary>
+      <ol><li>Tap <strong>“Veto a film”</strong> and type the title exactly as it appears in their picks. Do it <strong>before that week locks</strong> (Monday midnight).</li><li>You get <strong>one for the whole month</strong>, so save it.</li><li>The film shows as <strong>Vetoed</strong>. The picker then taps <strong>“Assign films”</strong> again, picks the same week and submits all 3 picks with the new one swapped in, also before the lock.</li></ol></details>
 
     <h3 id="h-insta">Instagram posts</h3>
     <details class="ht"><summary>Make a reel</summary>
@@ -252,17 +254,17 @@ tr.wk-past td{opacity:.6}
     <details class="ht"><summary>Copy your post's link</summary>
       <ol><li>Open the post on Instagram.</li><li>Tap the <strong>share</strong> (paper plane) icon or the <strong>…</strong> menu.</li><li>Tap <strong>Copy link</strong>, then paste it into your Letterboxd review for that film.</li></ol></details>
     <details class="ht"><summary>What not to do</summary>
-      <ul><li>Don't copy someone else's reel, review or captions: the film scores 0 and you lose 3 more points.</li><li>Don't delete the post before 31 December: your opponent may check it.</li><li>Don't post spoilers for a film on your opponent's assigned list.</li></ul></details>
+      <ul><li>Don't copy someone else's reel, review or captions: the film scores 0 and you lose 3 more points.</li><li>Don't delete the post before the challenge ends: your opponent may check it.</li><li>Don't post spoilers for a film on your opponent's assigned list.</li></ul></details>
 
     <h3 id="h-bonus">Bonuses &amp; power-ups</h3>
     <details class="ht"><summary>Claim a side quest</summary>
       <ol><li>Tap <strong>“Claim a bonus”</strong> on the Tracker tab.</li><li>Pick the side quest, add proof or a note, and submit.</li><li>Each side quest counts once. Its points show under your name in “Bonuses and spot-checks”.</li></ol></details>
     <details class="ht"><summary>Use your Sick Day Pass</summary>
-      <ol><li>Before Sunday midnight of the week you'll miss, tap <strong>“Claim a bonus”</strong>.</li><li>Pick <strong>Power-up: Sick Day Pass</strong> and choose the week.</li><li>Submit and tell your opponent. That week's fine and −3 are cancelled. You only get one.</li></ol></details>
+      <ol><li>Before Monday midnight at the end of the week you'll miss, tap <strong>“Claim a bonus”</strong>.</li><li>Pick <strong>Power-up: Sick Day Pass</strong> and choose the week.</li><li>Submit and tell your opponent. That week's fine and −3 are cancelled. You only get one.</li></ol></details>
     <details class="ht"><summary>Play Double or Nothing</summary>
       <ol><li>Before a weekend, announce in the chat: “Double or Nothing: 4 films by Sunday.”</li><li>On Sunday night, tap <strong>“Claim a bonus”</strong>.</li><li>Pick <strong>won (+3)</strong> if you watched 4, or <strong>lost (−3)</strong> if you didn't. Be honest: your log shows it anyway.</li></ol></details>
     <details class="ht"><summary>Assign films, and use your Veto</summary>
-      <p>Both are done on the <strong>Watchlists</strong> tab, with the “Assign films” and “Veto a film” buttons. The steps are under <a href="#h-watch">Watchlists, picks &amp; vetoes</a>. When you log one of your assigned films, the +1 is added by itself.</p></details>
+      <p>Both are done on the <strong>Watchlists</strong> tab: 3 picks for your opponent every week, and one veto for the month. The steps are under <a href="#h-watch">Watchlists, picks &amp; vetoes</a>. When you log one of your assigned films, the +1 is added by itself.</p></details>
 
     <h3 id="h-spot">Spot-checks</h3>
     <details class="ht"><summary>Run a spot-check</summary>
@@ -274,9 +276,10 @@ tr.wk-past td{opacity:.6}
 
     <h3 id="h-score">Reading the scores</h3>
     <details class="ht"><summary>The line under “Scoreboard”</summary>
-      <p>It tells you where the challenge is: “Starts Tue 1 Dec, in 7 days” before it begins, then “Week 2 of 5 · World Tour · 3 days left” with a pulsing dot during it, and “Challenge over · final scores” at the end. The time it was last updated is at the end of the line.</p></details>
+      <p>It tells you where the challenge is: “Starts Tue 1 Dec, in 7 days” before it begins, then “Week 2 of 4 · World Tour · 3 days left” with a pulsing dot during it, and “Challenge over · final scores” at the end. The time it was last updated is at the end of the line.</p></details>
     <details class="ht"><summary>What the scorecard numbers mean</summary>
-      <ul><li><strong>Films of 25:</strong> your film count. Rewatches and shorts add half.</li><li><strong>Final score:</strong> film points + bonuses − 3 for each missed week. Highest on 31 Dec wins.</li><li><strong>Film points:</strong> points from your films alone.</li><li><strong>Bonuses:</strong> theme weeks, side quests and Double or Nothing.</li><li><strong>Still to pay:</strong> fines you haven't paid yet. The pot section shows each week.</li><li><strong>LEADING:</strong> who's ahead on score (ties go to more films).</li></ul></details>
+      <ul><li><strong>Films of 25:</strong> your film count. Rewatches and shorts add half.</li><li><strong>Final score:</strong> film points + bonuses − 3 for each missed week, and − 3 for each pick short of 9 (after 28 Dec). Highest on 28 Dec wins.</li>
+      <li><strong>Picks watched:</strong> how many of your opponent's picks you've watched, and how many you need (9 of 12).</li><li><strong>Film points:</strong> points from your films alone.</li><li><strong>Bonuses:</strong> theme weeks, side quests and Double or Nothing.</li><li><strong>Still to pay:</strong> fines you haven't paid yet. The pot section shows each week.</li><li><strong>LEADING:</strong> who's ahead on score (ties go to more films).</li></ul></details>
     <details class="ht"><summary>What the weekly check means</summary>
       <ul><li><strong>Upcoming:</strong> the week hasn't started.</li><li><strong>This week</strong> (pulsing red dot, tinted row): the current week. Each player's cell shows progress, like “3 of 5 · 2 to go · 4 days left”, and turns green (“Minimum met”) once you reach the minimum.</li><li><strong>Done:</strong> you met the minimum.</li><li><strong>Missed · ₹amount:</strong> you fell short; that's your fine for the week.</li><li><strong>Sick Day Pass:</strong> missed, but covered.</li><li><strong>Theme done +2:</strong> 2 or more theme films that week.</li></ul></details>
     <details class="ht"><summary>See only one player's films</summary>
@@ -284,16 +287,16 @@ tr.wk-past td{opacity:.6}
 
     <h3 id="h-money">Fines, the pot &amp; violations</h3>
     <details class="ht"><summary>How fines are worked out</summary>
-      <p>Each week ends Sunday at midnight. For every film you're short of the minimum (5, or 3 in week 5), you owe ₹200. Half films count, so 4.5 of 5 costs ₹100. The site works it out on its own.</p></details>
+      <p>Each week ends Monday at midnight. For every film you're short of the target (7 in Week 1, then 6), you owe ₹200. Half films count, so 4.5 of 5 costs ₹100. The site works it out on its own.</p></details>
     <details class="ht"><summary>Pay your fine</summary>
-      <ol><li>On Monday, check <strong>The pot</strong> on the Tracker: it shows each week's fine and the deadline, the <strong>Tuesday after the week, 11:59 pm</strong>. On Monday and Tuesday, the week that needs paying pulses and says “Payment due now”. Each fine shows <strong>Due</strong>, <strong>Paid</strong>, <strong>Overdue</strong> or <strong>Late · doubled</strong>.</li><li>Pay the amount by UPI to whoever holds the pot, and take a screenshot showing the amount, date and transaction ID.</li><li>Tap <strong>“Pay the pot”</strong>, pick the week, enter the amount, drag in your screenshot and submit.</li><li>Tap <strong>Refresh</strong>. Your week turns <strong>Paid</strong>, with a link to your screenshot.</li></ol></details>
+      <ol><li>On Tuesday, check <strong>The pot</strong> on the Tracker: it shows each week's fine and the deadline, the <strong>Wednesday after the week, 11:59 pm</strong>. On Tuesday and Wednesday, the week that needs paying pulses and says “Payment due now”. Each fine shows <strong>Due</strong>, <strong>Paid</strong>, <strong>Overdue</strong> or <strong>Late · doubled</strong>.</li><li>Pay the amount by UPI to whoever holds the pot, and take a screenshot showing the amount, date and transaction ID.</li><li>Tap <strong>“Pay the pot”</strong>, pick the week, enter the amount, drag in your screenshot and submit.</li><li>Tap <strong>Refresh</strong>. Your week turns <strong>Paid</strong>, with a link to your screenshot.</li></ol></details>
     <details class="ht"><summary>Raise a violation</summary>
       <ol><li>Tap <strong>“Raise a violation”</strong> on the Tracker.</li><li>Pick the type:
-        <ul><li><strong>Unpaid or late fine:</strong> pick the week. If your opponent hasn't paid it by the Tuesday deadline, their fine for that week <strong>doubles</strong>.</li><li><strong>Copied Instagram post:</strong> enter their film's ID from the Film log (like LB-574954935) and paste the link to the original. The film scores 0 and they lose 3 points.</li><li><strong>Other rule break:</strong> describe it, then settle it in the chat.</li></ul></li>
+        <ul><li><strong>Unpaid or late fine:</strong> pick the week. If your opponent hasn't paid it by the Wednesday deadline, their fine for that week <strong>doubles</strong>.</li><li><strong>Copied Instagram post:</strong> enter their film's ID from the Film log (like LB-574954935) and paste the link to the original. The film scores 0 and they lose 3 points.</li><li><strong>Other rule break:</strong> describe it, then settle it in the chat.</li></ul></li>
         <li>Add your evidence and submit. Violations show under <strong>The pot</strong> on the Tracker.</li></ol>
       <p class="muted">Only violations against your opponent count. Raised by mistake? Close the issue.</p></details>
-    <details class="ht"><summary>What happens on 31 December</summary>
-      <ol><li>Final scores lock at 11:59 pm.</li><li>The lower score is the loser and faces the loser's fate (see the Rulebook).</li><li>If you both hit 25 films, nobody's punished and the pot pays for a movie night.</li></ol></details>
+    <details class="ht"><summary>What happens on 28 December</summary>
+      <ol><li>Final scores lock at 11:59 pm. Missing picks (fewer than 9 of 12 watched) cost 3 points each from then.</li><li>The lower score is the loser and faces the loser's fate (see the Rulebook).</li><li>If you both hit 25 films, nobody's punished and the pot pays for a movie night.</li></ol></details>
 
     <h3 id="h-phone">On your phone</h3>
     <details class="ht"><summary>Add the site to your home screen</summary>
@@ -305,7 +308,7 @@ tr.wk-past td{opacity:.6}
 
     <h3 id="h-help">Troubleshooting</h3>
     <details class="ht"><summary>My film isn't showing</summary>
-      <ol><li>Wait up to an hour: Letterboxd is read once an hour. Check “Letterboxd synced” under Scoreboard, then tap <strong>Refresh</strong>.</li><li>Check the entry has a <strong>watched date</strong> in December 2026.</li><li>Check your Letterboxd profile is public, and your username is the one in the site's settings.</li><li>Used the backup form? Check you submitted it from your challenge GitHub account and the issue is still open.</li></ol></details>
+      <ol><li>Wait up to an hour: Letterboxd is read once an hour. Check “Letterboxd synced” under Scoreboard, then tap <strong>Refresh</strong>.</li><li>Check the entry has a <strong>watched date</strong> between 1 and 28 December 2026. Films watched on 29–31 Dec are just for fun and don't count.</li><li>Check your Letterboxd profile is public, and your username is the one in the site's settings.</li><li>Used the backup form? Check you submitted it from your challenge GitHub account and the issue is still open.</li></ol></details>
     <details class="ht"><summary>The points look wrong</summary>
       <ol><li>Open the film's entry from the log and check the rewatch tick, the <code>#short</code> tag and that the Instagram link is a reel or post.</li><li>Check your opponent's picks on the Watchlists tab, if the +1 is missing.</li><li>Check for red flags: a failed spot-check, a copied post, or “Deleted on Letterboxd”.</li></ol></details>
     <details class="ht"><summary>“GitHub is limiting requests”</summary>
@@ -344,12 +347,13 @@ tr.wk-past td{opacity:.6}
     <h3 id="r-basics">The basics</h3>
     <div class="card scroll"><table class="tbl">
       <tr><th>Rule</th><th>Detail</th></tr>
-      <tr><td>Dates</td><td>Tue 1 Dec to Thu 31 Dec 2026, midnight IST</td></tr>
+      <tr><td>Dates</td><td>Tue 1 Dec to Mon 28 Dec 2026: 4 weeks, each running Tuesday to Monday. 29–31 Dec are free days, just for fun</td></tr>
       <tr><td>Players</td><td>Sinjini vs Sankalp</td></tr>
-      <tr><td>Monthly goal</td><td>25 films each (about 6 a week)</td></tr>
-      <tr><td>Weekly minimum</td><td>5 films, checked every Sunday at midnight. Week 5 (28 to 31 Dec) needs only 3</td></tr>
+      <tr><td>Monthly goal</td><td>25 films each: 7 in week 1, then 6, 6 and 6</td></tr>
+      <tr><td>Weekly target</td><td>The target is also the minimum: 7, 6, 6, 6. Checked every Monday at midnight. Every film short costs ₹200</td></tr>
+      <tr><td>Weekly plan</td><td>Each week you share a watchlist, and your opponent picks 3 films for you. Both lock at midnight on the Monday before the week starts</td></tr>
       <tr><td>Logging</td><td>Log every film in your Letterboxd diary, with the date you watched it. This site reads both diaries every hour and does all the counting</td></tr>
-      <tr><td>Winner</td><td>Highest final score on 31 Dec at 11:59 pm</td></tr>
+      <tr><td>Winner</td><td>Highest final score on 28 Dec at 11:59 pm</td></tr>
     </table></div>
 
     <h3 id="r-counts">What counts as a film</h3>
@@ -367,15 +371,15 @@ tr.wk-past td{opacity:.6}
 
     <h3 id="r-themes">Weekly themes</h3>
     <p>At least 2 films each week must fit that week's theme. The rest are free picks.</p>
-    <p><strong>What counts as a theme film:</strong> a film on your <strong>locked watchlist</strong>, tagged for that week, and watched that week. Watchlists are drafts until <strong>12:00 am on Tue 1 Dec</strong>, then they lock and can't be changed. The site checks this by itself and marks theme films “Theme ✓”.</p>
+    <p><strong>What counts as a theme film:</strong> a film listed as a <strong>theme film on that week's locked watchlist</strong>, or one of your opponent's picks they <strong>marked as fitting the theme</strong>, watched that week. Each week's list is a draft until <strong>midnight on the Monday before</strong>, then it locks. The site checks this by itself and marks theme films “Theme ✓”.</p>
     <div class="card scroll"><table class="tbl">
-      <tr><th>Dates</th><th>Theme</th><th>The rule</th></tr>
-      <tr><td>1–6 Dec</td><td><strong>The Comeback</strong></td><td>Directors you used to love but stopped following</td></tr>
-      <tr><td>7–13 Dec</td><td><strong>World Tour</strong></td><td>Non-English films, a different country each time</td></tr>
-      <tr><td>14–20 Dec</td><td><strong>Director Deep Dive</strong></td><td>3+ films by one director you've never properly explored. Declare them before 1 Dec</td></tr>
-      <tr><td>21–27 Dec</td><td><strong>Decades Run</strong></td><td>One film each from the '60s, '70s, '80s, '90s and '00s</td></tr>
-      <tr><td>28–31 Dec</td><td><strong>2026 Catch-up</strong></td><td>This year's releases you missed. End by posting your top 10 of 2026</td></tr>
+      <tr><th>Week</th><th>Theme</th><th>Films</th><th>The rule</th></tr>
+      <tr><td>1 · 1–7 Dec</td><td><strong>The Comeback</strong></td><td>7</td><td>Directors you used to love but stopped following</td></tr>
+      <tr><td>2 · 8–14 Dec</td><td><strong>World Tour</strong></td><td>6</td><td>Non-English films, a different country each time</td></tr>
+      <tr><td>3 · 15–21 Dec</td><td><strong>Director Deep Dive</strong></td><td>6</td><td>3+ films by a director <strong>your opponent picks for you</strong>, sent with their Week 3 picks. You choose which of the director's films to watch</td></tr>
+      <tr><td>4 · 22–28 Dec</td><td><strong>Decades Run</strong></td><td>6</td><td>Films from the '60s, '70s, '80s, '90s and '00s, one per decade</td></tr>
     </table></div>
+    <p><strong>29–31 Dec: free days.</strong> No points, no fines. Catch up on 2026 releases you missed and post your top 10 of 2026, just for fun.</p>
 
     <h3 id="r-points">Points</h3>
     <p>The film count decides who hit 25. Points decide who wins the month.</p>
@@ -388,7 +392,8 @@ tr.wk-past td{opacity:.6}
       <tr><td>Posted it as a reel (rather than a carousel)</td><td>+2 bonus</td></tr>
       <tr><td>Completed the week's theme (2+ theme films)</td><td>+2 per week</td></tr>
       <tr><td>Side quest completed</td><td>as listed</td></tr>
-      <tr><td>Missed the weekly minimum</td><td>−3</td></tr>
+      <tr><td>Missed the weekly target</td><td>−3</td></tr>
+      <tr><td>Watched fewer than 9 of your 12 picks (counted after 28 Dec)</td><td>−3 per pick short</td></tr>
       <tr><td>Failed a spot-check</td><td>film scores 0, and −2</td></tr>
     </table></div>
     <p>Example: a 1962 Japanese film your opponent assigned, posted as a reel = 1 + 1 + 1 + 2 = <strong>5 points</strong>.</p>
@@ -413,8 +418,8 @@ tr.wk-past td{opacity:.6}
     </ol>
 
     <h3 id="r-stakes">Stakes and punishments</h3>
-    <p><strong>The pot.</strong> Every film you are short of the weekly minimum costs ₹200, paid into a shared pot. Weeks end on Sunday at midnight. Watch 3 of 5 and you pay ₹400 that week. Skip the whole month and you pay ₹4,600. A rewatch or short counts as half a film, so it saves ₹100. Pay by the Tuesday after the week ends (11:59 pm), and record it with the “Pay the pot” form and your screenshot. If it's still unpaid after that, your opponent can raise a violation and that week's fine doubles. A missed week also costs 3 points.</p>
-    <p><strong>The final loser</strong> (lower score on 31 Dec):</p>
+    <p><strong>The pot.</strong> Every film you are short of the weekly target costs ₹200, paid into a shared pot. Weeks end on Monday at midnight. Watch 4 of 6 and you pay ₹400 that week. Skip the whole month and you pay ₹5,000. A rewatch or short counts as half a film, so it saves ₹100. Pay by the Wednesday after the week ends (11:59 pm), and record it with the “Pay the pot” form and your screenshot. If it's still unpaid after that, your opponent can raise a violation and that week's fine doubles. A missed week also costs 3 points.</p>
+    <p><strong>The final loser</strong> (lower score on 28 Dec):</p>
     <ol>
       <li><strong>Pays for a theatre outing</strong> for both of you, popcorn and drinks included. The pot covers part of it first.</li>
       <li><strong>Watches the Punishment Film.</strong> The winner picks one notoriously bad or painfully long film. The loser watches all of it and posts a serious, full-length review, no sarcasm allowed.</li>
@@ -426,7 +431,7 @@ tr.wk-past td{opacity:.6}
     <p><strong>Violations.</strong> Either player can report the other with the “Raise a violation” button on the Tracker. Only reports against your opponent count, and they're listed under The pot.</p>
     <div class="card scroll"><table class="tbl">
       <tr><th>Violation</th><th>What happens</th></tr>
-      <tr><td>Unpaid or late fine</td><td>If that week's fine wasn't paid by the Tuesday deadline, it doubles</td></tr>
+      <tr><td>Unpaid or late fine</td><td>If that week's fine wasn't paid by the Wednesday deadline, it doubles</td></tr>
       <tr><td>Copied Instagram post or review</td><td>That film scores 0, and they lose 3 more points</td></tr>
       <tr><td>Any other rule break</td><td>Recorded on the site, then settled in the chat</td></tr>
     </table></div>
@@ -434,9 +439,9 @@ tr.wk-past td{opacity:.6}
     <h3 id="r-power">Power-ups and side quests</h3>
     <div class="card scroll"><table class="tbl">
       <tr><th>Power-up (one each)</th><th>What it does</th></tr>
-      <tr><td>Sick Day Pass</td><td>Skip one weekly minimum with no fine and no points penalty. Declare it before Sunday midnight</td></tr>
-      <tr><td>The Assignment</td><td>Your 3 assigned films are your weapon: pick long ones, old ones, or ones they've been avoiding</td></tr>
-      <tr><td>Veto</td><td>Reject one film your opponent assigns you, once, with the “Veto a film” button on the Watchlists tab. They must assign another</td></tr>
+      <tr><td>Sick Day Pass</td><td>Skip one weekly target with no fine and no points penalty. Declare it before that Monday midnight</td></tr>
+      <tr><td>The Assignment</td><td>Every week you pick 3 films for your opponent: 12 in all. They must watch at least 9 of them by 28 Dec, or lose 3 points for each one short. Pick long ones, old ones, or ones they've been avoiding</td></tr>
+      <tr><td>Veto</td><td>One veto for the whole month. Reject one film your opponent picked for you with the “Veto a film” button, before that week's picks lock. They must pick another</td></tr>
       <tr><td>Double or Nothing</td><td>Before a weekend, declare you'll watch 4 films by Sunday. Do it: +3. Fail: −3</td></tr>
     </table></div>
     <div class="card scroll" style="margin-top:12px"><table class="tbl">
@@ -450,64 +455,71 @@ tr.wk-past td{opacity:.6}
             <tr><td>Convince someone outside the challenge to watch a film you loved</td><td>+2</td></tr>
     </table></div>
 
-    <h3 id="r-prep">Before Day 1: prep</h3>
-    <p>The first week is easy to lose if you start on 1 December still deciding what to watch. Do this before then.</p>
+    <h3 id="r-prep">Before Day 1: prep, and the weekly rhythm</h3>
+    <p>You plan one week at a time. Before 1 December you only need Week 1 ready.</p>
 
-    <h3 style="font-size:15px">1. Build your watchlist (about 30 films)</h3>
-    <p>25 to watch, plus a few spares for when a film isn't available or isn't your mood. Share it on the Watchlists tab and plan it around the themes. <strong>It locks at 12:00 am on 1 Dec</strong>, and only films tagged for a week count as that week's theme films, so tag them before then.</p>
-    <div class="card scroll"><table class="tbl">
-      <tr><th>Week</th><th>Theme</th><th>Pick at least</th><th>Tip</th></tr>
-      <tr><td>1 · 1–6 Dec</td><td>The Comeback</td><td>2</td><td>Directors you used to love. Pick ones you're excited to return to: Week 1 sets the habit.</td></tr>
-      <tr><td>2 · 7–13 Dec</td><td>World Tour</td><td>2</td><td>Non-English films, each from a different country. Note the country next to each one.</td></tr>
-      <tr><td>3 · 14–20 Dec</td><td>Director Deep Dive</td><td>3</td><td>All by the director you declare. Check you can actually find 3 of their films.</td></tr>
-      <tr><td>4 · 21–27 Dec</td><td>Decades Run</td><td>5</td><td>One each from the '60s, '70s, '80s, '90s and '00s. The '60s and '70s ones also earn the pre-1980 bonus.</td></tr>
-      <tr><td>5 · 28–31 Dec</td><td>2026 Catch-up</td><td>2</td><td>This year's releases you missed. Keep a running list for your top 10.</td></tr>
-    </table></div>
+    <h3 style="font-size:15px">1. Every week, share your watchlist</h3>
     <ul>
-      <li><strong>Leave room</strong> in each week for your opponent's assigned films and for free picks.</li>
-      <li><strong>Check the readiness box</strong> on your Watchlists card. It turns green, “Ready for 1 December”, once you have 25+ films, every theme covered, a director declared and the right years for Weeks 4 and 5.</li>
-      <li><strong>Mix long and short films.</strong> Save 3-hour films for weekends, and keep a few under 100 minutes for tired weeknights.</li>
-      <li><strong>Check where each film streams</strong>, or that you can get it, before it's on your list. Note the platform beside it.</li>
-      <li><strong>Plan your side quests:</strong> a silent film, a 3-hour+ film, a country neither of you has seen, a December theatre release worth going out for.</li>
+      <li>On the Watchlists tab, tap <strong>“Share a weekly watchlist”</strong> and pick the week.</li>
+      <li>List at least <strong>2 theme films</strong>, with years in brackets, like <em>Jaws (1975)</em>, plus your other films.</li>
+      <li>Together with your opponent's 3 picks, plan enough for the week's target: <strong>7 for Week 1, 6 after that</strong>. A spare or two helps when a film isn't available.</li>
+      <li><strong>Week 3:</strong> your opponent picks your director. List 3+ of that director's films as your theme films.</li>
+      <li>Change it as often as you like. Your latest list for the week counts once it locks at <strong>midnight on the Monday before</strong>.</li>
+      <li>The <strong>readiness box</strong> on your card turns green once that week is covered.</li>
     </ul>
 
-    <h3 style="font-size:15px">2. Pick 3 films for your opponent</h3>
+    <h3 style="font-size:15px">2. Every week, pick 3 films for your opponent</h3>
     <ul>
-      <li>Submit them with <strong>“Assign films”</strong> on the Watchlists tab <strong>by Sunday 29 Nov</strong>.</li>
-      <li>Fair choices only: full-length features they haven't seen, that they can actually find to watch.</li>
-      <li>Make them count: something they've been avoiding, a classic they've never got round to, or one you love and want to talk about.</li>
-      <li>They can <strong>veto one by Monday 30 Nov</strong> with “Veto a film”, and you submit your picks again with a replacement the same day.</li>
-      <li>No spoilers about them in the chat, ever.</li>
+      <li>Tap <strong>“Assign films”</strong>, pick the week, enter 3 films and tick any that fit that week's theme. They count as theme films for your opponent.</li>
+      <li>Send them <strong>by Sunday night</strong>, so there's a day to veto and replace.</li>
+      <li><strong>Week 3:</strong> also pick your opponent's director for the Director Deep Dive, in the same form, by Sun 13 Dec. Choose someone they've never properly explored, with enough films they can find.</li>
+      <li>Fair choices only: full-length features they haven't seen, that they can actually find.</li>
+      <li>They must watch at least 9 of the 12 by 28 Dec.</li>
     </ul>
 
-    <h3 style="font-size:15px">3. Declare your Week 3 director</h3>
-    <p>Enter it on your watchlist (<strong>“Update my watchlist”</strong>) <strong>by Monday 30 Nov</strong>, with at least 3 of their films tagged “- Week 3”. It locks with your watchlist, so no switching later.</p>
+    <h3 style="font-size:15px">3. One veto for the month</h3>
+    <p>If a pick is unbearable, use your one veto with <strong>“Veto a film”</strong> before that week locks. The picker submits that week's picks again with a replacement, also before the lock.</p>
 
-    <h3 style="font-size:15px">4. Set up your tools</h3>
+    <h3 style="font-size:15px">4. Set up your tools (before 1 Dec)</h3>
     <ul>
-      <li><strong>Letterboxd:</strong> make sure your profile is public and you know how to log a film with a date, the rewatch tick and a review. Only December diary entries count, so nothing you log before then affects your score.</li>
-      <li><strong>GitHub:</strong> sign in on your phone and laptop with your challenge account, for the other forms (picks, payments, spot-checks).</li>
+      <li><strong>Letterboxd:</strong> make sure your profile is public and you know how to log a film with a date, the rewatch tick and a review. Only diary entries from 1–28 Dec count.</li>
+      <li><strong>GitHub:</strong> sign in on your phone and laptop with your challenge account, for the watchlist, picks, payment and spot-check forms.</li>
       <li><strong>Instagram:</strong> decide your format: a reel style or a carousel template you'll reuse, so each post takes minutes, not an hour.</li>
-      <li><strong>Screenshots:</strong> make sure you know how to grab screenshots or clips from the apps or player you'll use. Some streaming apps block screenshots, so test this first.</li>
+      <li><strong>Screenshots:</strong> make sure you can grab screenshots or clips from the apps you'll use. Some streaming apps block them, so test this first.</li>
       <li><strong>The pot:</strong> agree who holds it and their UPI ID. Pin it in the chat.</li>
       <li><strong>The site:</strong> add it to your phone's home screen and read the How to tab.</li>
     </ul>
 
     <h3 style="font-size:15px">5. Plan your time</h3>
     <ul>
-      <li>Block watching slots in your calendar: 5 films a week means something like 2 weeknights and both weekend days.</li>
-      <li>Pick a weekend for your <strong>Double or Nothing</strong> and the date for your <strong>3-films-in-a-day</strong> marathon.</li>
+      <li>Block watching slots in your calendar: 6 or 7 films a week is about one every day, with doubles at the weekend.</li>
+      <li>Pick a weekend for your <strong>Double or Nothing</strong> and a day for your <strong>3-films-in-a-day</strong> marathon.</li>
       <li>Agree one film to watch together, for the “watch + debate” side quest.</li>
     </ul>
 
-    <h3 style="font-size:15px">Timeline</h3>
+    <h3 style="font-size:15px">Before Day 1</h3>
     <div class="card scroll"><table class="tbl">
       <tr><th>By</th><th>Done</th></tr>
-      <tr><td>Fri 27 Nov</td><td>Both read the rulebook and sign the Oath (a thumbs-up in the chat). Watchlists drafted.</td></tr>
+      <tr><td>Fri 27 Nov</td><td>Both read the rulebook and sign the Oath (a thumbs-up in the chat).</td></tr>
       <tr><td>Sat 28 Nov</td><td>Check your Letterboxd is public; test your Instagram format and screenshots. Pot holder and UPI ID pinned in the chat.</td></tr>
-      <tr><td>Sun 29 Nov</td><td>Submit your opponent's 3 assigned films (“Assign films”).</td></tr>
-      <tr><td>Mon 30 Nov</td><td>Use your veto (if any) and swap the film. Final watchlist and Week 3 director in by midnight, when watchlists lock. Close all test entries. Pick your Day 1 film.</td></tr>
+      <tr><td>Sun 29 Nov</td><td>Submit your opponent's 3 picks for Week 1.</td></tr>
+      <tr><td>Mon 30 Nov</td><td>Veto (if you want to spend it now) and replace. Week 1 watchlists in by midnight, when Week 1 locks. Close all test entries.</td></tr>
       <tr><td>Tue 1 Dec</td><td>Watch. Post. Log. Let the grind begin.</td></tr>
+    </table></div>
+
+    <h3 style="font-size:15px">Every week after that</h3>
+    <div class="card scroll"><table class="tbl">
+      <tr><th>Day</th><th>What happens</th></tr>
+      <tr><td>Sunday</td><td>Send your opponent next week's 3 picks.</td></tr>
+      <tr><td>Monday</td><td>Veto if needed and replace. Share next week's watchlist. <strong>Midnight:</strong> this week ends and is checked, and next week's lists and picks lock.</td></tr>
+      <tr><td>Wednesday</td><td>Pay any fine for the week just ended by 11:59 pm, with the “Pay the pot” form.</td></tr>
+    </table></div>
+    <div class="card scroll" style="margin-top:12px"><table class="tbl">
+      <tr><th>Week</th><th>Picks by</th><th>Lists and picks lock</th><th>Week ends</th><th>Pay fines by</th></tr>
+      <tr><td>1</td><td>Sun 29 Nov</td><td>Mon 30 Nov, midnight</td><td>Mon 7 Dec, midnight</td><td>Wed 9 Dec</td></tr>
+      <tr><td>2</td><td>Sun 6 Dec</td><td>Mon 7 Dec, midnight</td><td>Mon 14 Dec, midnight</td><td>Wed 16 Dec</td></tr>
+      <tr><td>3</td><td>Sun 13 Dec</td><td>Mon 14 Dec, midnight</td><td>Mon 21 Dec, midnight</td><td>Wed 23 Dec</td></tr>
+      <tr><td>4</td><td>Sun 20 Dec</td><td>Mon 21 Dec, midnight</td><td>Mon 28 Dec, midnight</td><td>Wed 30 Dec</td></tr>
     </table></div>
 
     <h3 id="r-kickoff">Fair play</h3>

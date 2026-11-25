@@ -1,8 +1,19 @@
-name: "🎯 Assign films to my opponent"
-description: Pick the 3 films your opponent must watch. Submit again to replace a vetoed film; your latest picks count.
+name: "🎯 Assign 3 films to my opponent"
+description: Your 3 picks for one week. Due by Sunday night before the week; they lock at 12:00 am on the Tuesday the week starts. Submit again to change them before then (or to replace a vetoed film).
 title: "[Picks] "
 labels: ["picks"]
 body:
+  - type: dropdown
+    id: week
+    attributes:
+      label: Week
+      options:
+        - "Week 1 (1-7 Dec) · The Comeback"
+        - "Week 2 (8-14 Dec) · World Tour"
+        - "Week 3 (15-21 Dec) · Director Deep Dive"
+        - "Week 4 (22-28 Dec) · Decades Run"
+    validations:
+      required: true
   - type: input
     id: f1
     attributes:
@@ -22,6 +33,21 @@ body:
       label: Pick 3
     validations:
       required: true
+  - type: input
+    id: director
+    attributes:
+      label: Week 3 only - the director your opponent must deep-dive
+      description: For Week 3 (Director Deep Dive), you choose their director. They watch 3+ of that director's films.
+      placeholder: e.g. Satyajit Ray
+  - type: checkboxes
+    id: themefit
+    attributes:
+      label: Which picks fit this week's theme?
+      description: Ticked picks count as theme films for your opponent.
+      options:
+        - label: Pick 1 fits the theme
+        - label: Pick 2 fits the theme
+        - label: Pick 3 fits the theme
   - type: textarea
     id: note
     attributes:

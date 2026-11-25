@@ -25,11 +25,10 @@ body:
     attributes:
       label: Which week? (needed for Sick Day Pass)
       options:
-        - "Week 1 (1-6 Dec)"
-        - "Week 2 (7-13 Dec)"
-        - "Week 3 (14-20 Dec)"
-        - "Week 4 (21-27 Dec)"
-        - "Week 5 (28-31 Dec)"
+        - "Week 1 (1-7 Dec)"
+        - "Week 2 (8-14 Dec)"
+        - "Week 3 (15-21 Dec)"
+        - "Week 4 (22-28 Dec)"
   - type: textarea
     id: proof
     attributes:
