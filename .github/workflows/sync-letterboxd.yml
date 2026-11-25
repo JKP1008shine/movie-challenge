@@ -1,0 +1,32 @@
+name: Sync Letterboxd
+
+on:
+  schedule:
+    - cron: "15 * * 12 *"     # every hour in December
+    - cron: "15 */3 1-3 1 *"  # every 3 hours on 1-3 Jan, to catch late entries
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-commit
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read both Letterboxd diaries
+        run: python3 scripts/sync_letterboxd.py
+      - name: Save new entries
+        run: |
+          if [ -n "$(git status --porcelain data)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data
+            git commit -m "Sync Letterboxd diaries"
+            git pull --rebase
+            git push
+          fi
